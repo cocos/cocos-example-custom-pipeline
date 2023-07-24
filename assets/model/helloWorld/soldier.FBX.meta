@@ -1,0 +1,69 @@
+{
+  "ver": "2.3.8",
+  "importer": "fbx",
+  "imported": false,
+  "uuid": "e3553cad-2f15-4293-859a-8f43c780f289",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "soldier",
+        "uri": "db://assets/model/helloWorld/soldier.png"
+      },
+      {
+        "name": "shield.jpg",
+        "uri": "e3553cad-2f15-4293-859a-8f43c780f289@e94f1"
+      }
+    ],
+    "redirect": "e3553cad-2f15-4293-859a-8f43c780f289@d252c",
+    "assetFinder": {
+      "meshes": [
+        "e3553cad-2f15-4293-859a-8f43c780f289@18751",
+        "e3553cad-2f15-4293-859a-8f43c780f289@da6f3",
+        "e3553cad-2f15-4293-859a-8f43c780f289@4b929",
+        "e3553cad-2f15-4293-859a-8f43c780f289@39f7b"
+      ],
+      "skeletons": [
+        "e3553cad-2f15-4293-859a-8f43c780f289@30732",
+        "e3553cad-2f15-4293-859a-8f43c780f289@f1394",
+        "e3553cad-2f15-4293-859a-8f43c780f289@75ee4",
+        "e3553cad-2f15-4293-859a-8f43c780f289@a72ab"
+      ],
+      "textures": [
+        "e3553cad-2f15-4293-859a-8f43c780f289@f3caa",
+        "e3553cad-2f15-4293-859a-8f43c780f289@a2be1"
+      ],
+      "materials": [
+        "8a58ddec-f437-40b9-8ec0-1fc87de97fb5",
+        "8e047178-f61c-4322-a2f6-d1adb28b6ae2"
+      ],
+      "scenes": [
+        "e3553cad-2f15-4293-859a-8f43c780f289@d252c"
+      ]
+    },
+    "dumpMaterials": true,
+    "materialDumpDir": "db://assets/material",
+    "animationImportSettings": [
+      {
+        "name": "Take 001",
+        "duration": 1.3333333730697632,
+        "fps": 30,
+        "splits": [
+          {
+            "name": "Take 001",
+            "from": 0.03333333333333333,
+            "to": 1.3333333730697632,
+            "wrapMode": 2
+          }
+        ]
+      }
+    ],
+    "fbx": {
+      "preferLocalTimeSpan": false,
+      "smartMaterialEnabled": false,
+      "matchMeshNames": false
+    },
+    "mountAllAnimationsOnPrefab": true
+  }
+}
