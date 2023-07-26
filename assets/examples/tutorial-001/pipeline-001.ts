@@ -111,7 +111,8 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
                     gfx.LoadOp.CLEAR,
                     gfx.StoreOp.STORE,
                     camera.clearDepth,
-                    camera.clearStencil);
+                    camera.clearStencil,
+                    camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL);
             } else {
                 pass.addDepthStencil(`DepthStencil${id}`, gfx.LoadOp.LOAD);
             }
