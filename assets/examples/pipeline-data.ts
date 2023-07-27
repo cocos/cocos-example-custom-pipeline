@@ -18,15 +18,13 @@ if (cclegacy.rendering.windowID === undefined) {
     cclegacy.rendering.windows = new WeakMap<Object, WindowInfo>();
 }
 
-const windows = cclegacy.rendering.windows;
-
 export function getWindowInfo(camera: renderer.scene.Camera): WindowInfo {
-    let info = windows.get(camera.window);
+    let info = cclegacy.rendering.windows.get(camera.window);
     if (info !== undefined) {
         return info;
     }
     info = new WindowInfo(cclegacy.rendering.windowID, 0, 0, camera.window.framebuffer);
     ++cclegacy.rendering.windowID;
-    windows.set(camera.window, info);
+    cclegacy.rendering.windows.set(camera.window, info);
     return info;
 }
