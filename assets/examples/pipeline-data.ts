@@ -13,18 +13,19 @@ export class WindowInfo {
     framebuffer: gfx.Framebuffer;
 }
 
-if (cclegacy.rendering.windowID === undefined) {
-    cclegacy.rendering.windowID = 0;
-    cclegacy.rendering.windows = new WeakMap<Object, WindowInfo>();
+if (cclegacy.user === undefined) {
+    cclegacy.user = new Object();
+    cclegacy.user.windowID = 0;
+    cclegacy.user.windows = new WeakMap<Object, WindowInfo>();
 }
 
 export function getWindowInfo(camera: renderer.scene.Camera): WindowInfo {
-    let info = cclegacy.rendering.windows.get(camera.window);
+    let info = cclegacy.user.windows.get(camera.window);
     if (info !== undefined) {
         return info;
     }
-    info = new WindowInfo(cclegacy.rendering.windowID, 0, 0, camera.window.framebuffer);
-    ++cclegacy.rendering.windowID;
-    cclegacy.rendering.windows.set(camera.window, info);
+    info = new WindowInfo(cclegacy.user.windowID, 0, 0, camera.window.framebuffer);
+    ++cclegacy.user.windowID;
+    cclegacy.user.windows.set(camera.window, info);
     return info;
 }
