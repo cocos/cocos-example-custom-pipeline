@@ -141,7 +141,7 @@
     "_illuminanceHDR": 125000,
     "_illuminance": 125000,
     "_illuminanceLDR": 3.2552083333333335,
-    "_shadowEnabled": false,
+    "_shadowEnabled": true,
     "_shadowPcf": 2,
     "_shadowBias": 0.01,
     "_shadowNormalBias": 0,
@@ -1967,7 +1967,7 @@
   },
   {
     "__type__": "cc.ShadowsInfo",
-    "_enabled": true,
+    "_enabled": false,
     "_type": 1,
     "_normal": {
       "__type__": "cc.Vec3",

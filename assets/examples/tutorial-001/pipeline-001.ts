@@ -60,7 +60,10 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
         ppl.updateRenderWindow(`Color${id}`, camera.window);
         ppl.updateDepthStencil(`DepthStencil${id}`, width, height);
     }
+
     // build forward lighting pipeline
+    // NOTE: this is just a simple example, you can implement your own pipeline here
+    // In this example, we have turned off shadowmap in the scene
     private buildForward (
         ppl: rendering.BasicPipeline,
         camera: renderer.scene.Camera,
