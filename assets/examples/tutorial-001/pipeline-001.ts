@@ -18,7 +18,7 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
             if (camera.scene === null || camera.window === null) {
                 continue;
             }
-            // prepae camera resources
+            // prepare camera resources
             const info = this.prepareCameraResources(ppl, camera);
 
             // build forward lighting for editor or game view
