@@ -194,19 +194,19 @@ class MoveResourcePipeline implements rendering.PipelineBuilder {
             // 2. 对同样性质且不重叠的资源进行move
             const advancedPipeline = ppl as rendering.Pipeline;
             { // optional move test, move to a 3-slices texture first, a 3-slices texture view will be created in resource graph. 
-                // 2.1 move ctop/cbottom/cleft 3 textures to a single 3-slice texArray3_0. 
-                // 2.1 把 ctop/cbottom/cleft 3个texture move到一个具有3个slice的纹理数组texArray3_0上
+                // 2.1 move cright/cleft/ctop 3 textures to a single 3-slice texArray3_0. 
+                // 2.1 把 cright/cleft/ctop 3个texture move到一个具有3个slice的纹理数组texArray3_0上
                 let mvs0 = [];
-                mvs0.push(new MovePair('ctop', 'texArray3_0', 1, 1, 0, 0, 0));
-                mvs0.push(new MovePair('cbottom', 'texArray3_0', 1, 1, 0, 1, 0));
-                mvs0.push(new MovePair('cleft', 'texArray3_0', 1, 1, 0, 2, 0));
+                mvs0.push(new MovePair('cright', 'texArray3_0', 1, 1, 0, 0, 0));
+                mvs0.push(new MovePair('cleft', 'texArray3_0', 1, 1, 0, 1, 0));
+                mvs0.push(new MovePair('ctop', 'texArray3_0', 1, 1, 0, 2, 0));
                 advancedPipeline.addMovePass(mvs0);
             }
             {// optional move test, move rest faces to a 3-slices texture, a 3-slices texture view will be created in resource graph.
-                // 2.2 move cright/cfront/crear 3 textures to a single 3-slice texture texArray3_1. 
-                // 2.2 把 cright/cfront/crear 3个texture move到一个具有3个slice的纹理数组texArray3_1上
+                // 2.2 move cbottom/cfront/crear 3 textures to a single 3-slice texture texArray3_1. 
+                // 2.2 把 cbottom/cfront/crear 3个texture move到一个具有3个slice的纹理数组texArray3_1上
                 let mvs1 = [];
-                mvs1.push(new MovePair('cright', 'texArray3_1', 1, 1, 0, 0, 0));
+                mvs1.push(new MovePair('cbottom', 'texArray3_1', 1, 1, 0, 0, 0));
                 mvs1.push(new MovePair('cfront', 'texArray3_1', 1, 1, 0, 1, 0));
                 mvs1.push(new MovePair('crear', 'texArray3_1', 1, 1, 0, 2, 0));
                 advancedPipeline.addMovePass(mvs1);
@@ -266,9 +266,44 @@ export class pipeline_001 extends Component {
         // 空操作
     }
     update (deltaTime: number) {
-        // noop
-        // 空操作
+        // find main camera
+        // 找到相机节点
+        let camNode;
+        for (let comp of director.getScene().children) {
+            if (comp && comp.name === 'Main Camera') {
+                camNode = comp;
+            }
+        }
+        if (camNode) {
+            // update position and rotation
+            // 更新位置和旋转
+            const stepDegree = (360 / 8) / 60;
+            const currAng = this._accAng;
+            const pos = camNode.position;
+            const rot = camNode.eulerAngles;
+
+            const newRot = new Vec3(rot);
+            newRot.y += stepDegree;
+
+            const radius = pos.length();
+            const rad = currAng * Math.PI / 180;
+            const x = radius * Math.sin(rad);
+            const z = radius * Math.cos(rad);
+            const newPos = new Vec3(pos);
+            newPos.x = x;
+            newPos.z = z;
+
+            camNode.setPosition(newPos);
+            camNode.setRotationFromEuler(newRot);
+
+            this._accAng += stepDegree;
+            if (this._accAng > 360) {
+                this._accAng -= 360;
+            }
+        }
     }
+
+    _accAng: number = 0;
 }
 
 game.on(Game.EVENT_RENDERER_INITED, () => {

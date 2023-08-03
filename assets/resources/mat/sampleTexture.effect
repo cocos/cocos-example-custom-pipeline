@@ -35,11 +35,6 @@ CCProgram unlit-fs %{
   precision highp float;
   in vec2 v_uv;
 
-  #pragma rate Index pass
-  uniform Index {
-    int sliceIndex;
-  };
-
   #pragma rate mainTexture pass
   uniform sampler2D mainTexture;
 
