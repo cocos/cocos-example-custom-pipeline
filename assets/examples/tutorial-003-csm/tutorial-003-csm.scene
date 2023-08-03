@@ -23,10 +23,10 @@
         "__id__": 5
       },
       {
-        "__id__": 7
+        "__id__": 8
       },
       {
-        "__id__": 10
+        "__id__": 11
       }
     ],
     "_active": true,
@@ -61,7 +61,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 13
+      "__id__": 14
     },
     "_id": "aef590c8-7acd-46cc-8c4b-d66324d134ce"
   },
@@ -174,6 +174,9 @@
     "_components": [
       {
         "__id__": 6
+      },
+      {
+        "__id__": 7
       }
     ],
     "_prefab": null,
@@ -253,6 +256,18 @@
     "_id": "7dWQTpwS5LrIHnc1zAPUtf"
   },
   {
+    "__type__": "3294dlwJ75PO4NmwqReUMnR",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 5
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_id": "f1OVTE6KtHGYSUGOEdJr31"
+  },
+  {
     "__type__": "cc.Node",
     "_name": "Plane",
     "_objFlags": 0,
@@ -264,7 +279,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 8
+        "__id__": 9
       }
     ],
     "_prefab": null,
@@ -303,7 +318,7 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 7
+      "__id__": 8
     },
     "_enabled": true,
     "__prefab": null,
@@ -315,7 +330,7 @@
     ],
     "_visFlags": 0,
     "bakeSettings": {
-      "__id__": 9
+      "__id__": 10
     },
     "_mesh": {
       "__uuid__": "1263d74c-8167-4928-91a6-4e2672411f47@2e76e",
@@ -364,7 +379,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 11
+        "__id__": 12
       }
     ],
     "_prefab": null,
@@ -403,7 +418,7 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 10
+      "__id__": 11
     },
     "_enabled": true,
     "__prefab": null,
@@ -415,7 +430,7 @@
     ],
     "_visFlags": 0,
     "bakeSettings": {
-      "__id__": 12
+      "__id__": 13
     },
     "_mesh": {
       "__uuid__": "1263d74c-8167-4928-91a6-4e2672411f47@17020",
@@ -455,28 +470,28 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 14
-    },
-    "shadows": {
       "__id__": 15
     },
-    "_skybox": {
+    "shadows": {
       "__id__": 16
     },
-    "fog": {
+    "_skybox": {
       "__id__": 17
     },
-    "octree": {
+    "fog": {
       "__id__": 18
     },
-    "skin": {
+    "octree": {
       "__id__": 19
     },
-    "lightProbeInfo": {
+    "skin": {
       "__id__": 20
     },
-    "postSettings": {
+    "lightProbeInfo": {
       "__id__": 21
+    },
+    "postSettings": {
+      "__id__": 22
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false
