@@ -5,26 +5,6 @@
   "uuid": "0ab3142a-6968-4073-95af-026bc3b23623",
   "files": [],
   "subMetas": {
-    "19240": {
-      "importer": "gltf-embeded-image",
-      "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@19240",
-      "displayName": "",
-      "id": "19240",
-      "name": "stone.image",
-      "userData": {
-        "gltfIndex": 1,
-        "fixAlphaTransparencyArtifacts": true,
-        "hasAlpha": false,
-        "type": "texture"
-      },
-      "ver": "1.0.3",
-      "imported": true,
-      "files": [
-        ".jpg",
-        ".json"
-      ],
-      "subMetas": {}
-    },
     "71919": {
       "importer": "gltf-mesh",
       "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@71919",
@@ -205,12 +185,52 @@
         "triangleCount": 437
       }
     },
-    "b26c5": {
+    "baeab": {
       "importer": "gltf-embeded-image",
-      "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@b26c5",
+      "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@baeab",
       "displayName": "",
-      "id": "b26c5",
-      "name": "tree.image",
+      "id": "baeab",
+      "name": "seafloor.jpg.image",
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".jpg",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
+      }
+    },
+    "eeccb": {
+      "importer": "gltf-embeded-image",
+      "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@eeccb",
+      "displayName": "",
+      "id": "eeccb",
+      "name": "stone.jpg.image",
+      "userData": {
+        "gltfIndex": 1,
+        "fixAlphaTransparencyArtifacts": true,
+        "hasAlpha": false,
+        "type": "texture"
+      },
+      "ver": "1.0.3",
+      "imported": true,
+      "files": [
+        ".jpg",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "3b6f8": {
+      "importer": "gltf-embeded-image",
+      "uuid": "0ab3142a-6968-4073-95af-026bc3b23623@3b6f8",
+      "displayName": "",
+      "id": "3b6f8",
+      "name": "tree.png.image",
       "userData": {
         "gltfIndex": 2,
         "fixAlphaTransparencyArtifacts": true,
@@ -239,8 +259,8 @@
         "mipfilter": "none",
         "premultiplyAlpha": false,
         "anisotropy": 0,
-        "isUuid": false,
-        "imageUuidOrDatabaseUri": "db://assets/model/helloWorld/seafloor.jpg"
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@baeab"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -264,7 +284,7 @@
         "premultiplyAlpha": false,
         "anisotropy": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@19240"
+        "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@eeccb"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -288,7 +308,7 @@
         "premultiplyAlpha": false,
         "anisotropy": 0,
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@b26c5"
+        "imageUuidOrDatabaseUri": "0ab3142a-6968-4073-95af-026bc3b23623@3b6f8"
       },
       "ver": "1.0.22",
       "imported": true,
@@ -317,16 +337,16 @@
   "userData": {
     "imageMetas": [
       {
-        "name": "seafloor",
-        "uri": "db://assets/model/helloWorld/seafloor.jpg"
+        "name": "seafloor.jpg",
+        "uri": "0ab3142a-6968-4073-95af-026bc3b23623@baeab"
       },
       {
-        "name": "stone",
-        "uri": "0ab3142a-6968-4073-95af-026bc3b23623@19240"
+        "name": "stone.jpg",
+        "uri": "0ab3142a-6968-4073-95af-026bc3b23623@eeccb"
       },
       {
-        "name": "tree",
-        "uri": "0ab3142a-6968-4073-95af-026bc3b23623@b26c5"
+        "name": "tree.png",
+        "uri": "0ab3142a-6968-4073-95af-026bc3b23623@3b6f8"
       }
     ],
     "redirect": "0ab3142a-6968-4073-95af-026bc3b23623@cc8e5",
@@ -360,8 +380,8 @@
     },
     "dumpMaterials": true,
     "materialDumpDir": "db://assets/material",
+    "legacyFbxImporter": true,
     "fbx": {
-      "preferLocalTimeSpan": false,
       "smartMaterialEnabled": false,
       "matchMeshNames": false
     },
