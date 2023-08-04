@@ -26,8 +26,6 @@ class CsmPipeline implements rendering.PipelineBuilder {
             // 准备摄像机资源
             const info = this.prepareCameraResources(ppl, camera);
 
-            ppl.update(camera);
-
             // build forward lighting for editor or game view
             // 为编辑器以及游戏视图构建前向光照管线
             this.buildForward(ppl, camera, info.id, info.width, info.height);
