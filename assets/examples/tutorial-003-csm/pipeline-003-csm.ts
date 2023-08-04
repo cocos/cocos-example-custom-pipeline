@@ -166,7 +166,8 @@ class CsmPipeline implements rendering.PipelineBuilder {
         const mainLight = scene.mainLight;
 
         // CSM
-        if (mainLight && mainLight.shadowEnabled) {
+        const enableCSM = mainLight && mainLight.shadowEnabled;
+        if (enableCSM) {
             this.buildCascadedShadowMapPass(ppl, id, mainLight, camera);
         }
 
@@ -186,48 +187,50 @@ class CsmPipeline implements rendering.PipelineBuilder {
 
         // Forward Lighting
         // 前向光照
-        const pass = ppl.addRenderPass(width, height, 'default');
-        // set viewport
-        // 设置视口
-        pass.setViewport(this._viewport);
-        // bind output render target
-        // 绑定输出渲染目标
-        if (camera.clearFlag & gfx.ClearFlagBit.COLOR) {
-            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, this._clearColor);
-        } else {
-            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
+        {
+            const pass = ppl.addRenderPass(width, height, 'default');
+            // set viewport
+            // 设置视口
+            pass.setViewport(this._viewport);
+            // bind output render target
+            // 绑定输出渲染目标
+            if (camera.clearFlag & gfx.ClearFlagBit.COLOR) {
+                pass.addRenderTarget(`Color${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, this._clearColor);
+            } else {
+                pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
+            }
+            // bind depth stencil buffer
+            // 绑定深度模板缓冲区
+            if (camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL) {
+                pass.addDepthStencil(
+                    `DepthStencil${id}`,
+                    gfx.LoadOp.CLEAR,
+                    gfx.StoreOp.STORE,
+                    camera.clearDepth,
+                    camera.clearStencil,
+                    camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL);
+            } else {
+                pass.addDepthStencil(`DepthStencil${id}`, gfx.LoadOp.LOAD);
+            }
+            // CSM
+            if (enableCSM) {
+                pass.addTexture(`ShadowMap${id}`, 'cc_shadowMap');
+            }
+            // add opaque and mask queue
+            // 添加不透明和遮罩队列
+            pass.addQueue(rendering.QueueHint.NONE)
+                .addSceneOfCamera(
+                    camera,
+                    new rendering.LightInfo(),
+                    rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK);
+            // add transparent queue
+            // 添加透明队列
+            pass.addQueue(rendering.QueueHint.BLEND)
+                .addSceneOfCamera(
+                    camera,
+                    new rendering.LightInfo(),
+                    rendering.SceneFlags.BLEND);
         }
-        // bind depth stencil buffer
-        // 绑定深度模板缓冲区
-        if (camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL) {
-            pass.addDepthStencil(
-                `DepthStencil${id}`,
-                gfx.LoadOp.CLEAR,
-                gfx.StoreOp.STORE,
-                camera.clearDepth,
-                camera.clearStencil,
-                camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL);
-        } else {
-            pass.addDepthStencil(`DepthStencil${id}`, gfx.LoadOp.LOAD);
-        }
-
-        // CSM
-        pass.addTexture(`ShadowMap${id}`, 'cc_shadowMap');
-
-        // add opaque and mask queue
-        // 添加不透明和遮罩队列
-        pass.addQueue(rendering.QueueHint.NONE)
-            .addSceneOfCamera(
-                camera,
-                new rendering.LightInfo(),
-                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK);
-        // add transparent queue
-        // 添加透明队列
-        pass.addQueue(rendering.QueueHint.BLEND)
-            .addSceneOfCamera(
-                camera,
-                new rendering.LightInfo(),
-                rendering.SceneFlags.BLEND);
     }
     // internal cached resources
     // 管线内部缓存资源

@@ -109,8 +109,8 @@
     },
     "dumpMaterials": true,
     "materialDumpDir": "db://assets/material",
+    "legacyFbxImporter": true,
     "fbx": {
-      "preferLocalTimeSpan": false,
       "smartMaterialEnabled": false,
       "matchMeshNames": false
     },
