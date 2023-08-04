@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.SceneAsset",
-    "_name": "tutorial-003-csm",
+    "_name": "simple-002-csm",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -11,7 +11,7 @@
   },
   {
     "__type__": "cc.Scene",
-    "_name": "tutorial-003-csm",
+    "_name": "tutorial-002-csm",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,

@@ -243,8 +243,8 @@ class CsmPipeline implements rendering.PipelineBuilder {
 // 注册管线
 rendering.setCustomPipeline('MyPipeline', new CsmPipeline());
 
-@ccclass('pipeline_003_csm')
-export class pipeline_003_csm extends Component {
+@ccclass('pipeline_002_csm')
+export class pipeline_002_csm extends Component {
     start() {
         // noop
         // 空操作
