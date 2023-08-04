@@ -127,26 +127,16 @@ class CsmPipeline implements rendering.PipelineBuilder {
         const pass = ppl.addRenderPass(width, height, 'default');
         pass.addRenderTarget(`ShadowMap${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, new gfx.Color(1, 1, 1, 1));
         pass.addDepthStencil(`ShadowDepth${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.DISCARD);
-        if (false /*light.shadowFixedArea*/) {
+        const csmLevel = ppl.pipelineSceneData.csmSupported ? light.csmLevel : 1;
+        for (let level = 0; level !== csmLevel; ++level) {
+            this.getMainLightViewport(light, width, height, level, this._viewport);
             const queue = pass.addQueue(rendering.QueueHint.NONE, 'shadow-caster');
+            queue.setViewport(this._viewport);
             // queue.addSceneCulledByDirectionalLight(camera,
             //     SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER,
-            //     light, 0);
-            queue.addSceneOfCamera(camera, new rendering.LightInfo(light, 0),
+            //     light, level);
+            queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level),
                 rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
-        } else {
-            const csmLevel = ppl.pipelineSceneData.csmSupported
-                ? light.csmLevel : 1;
-            for (let level = 0; level !== csmLevel; ++level) {
-                this.getMainLightViewport(light, width, height, level, this._viewport);
-                const queue = pass.addQueue(rendering.QueueHint.NONE, 'shadow-caster');
-                queue.setViewport(this._viewport);
-                // queue.addSceneCulledByDirectionalLight(camera,
-                //     SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER,
-                //     light, level);
-                queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level),
-                    rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
-            }
         }
     }
     // build forward lighting pipeline
