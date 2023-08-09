@@ -1,0 +1,45 @@
+// Effect Syntax Guide: https://docs.cocos.com/creator/manual/zh/shader/index.html
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - vert: standard-vs:vert
+      frag: unlit-fs:frag
+      pass: sampleTexture
+      phase: sampleTexture-phase
+}%
+
+CCProgram standard-vs %{
+  precision highp float;
+  #include <legacy/input>
+  #include <builtin/uniforms/cc-global>
+  #include <legacy/decode-base>
+  #include <legacy/local-batch>
+  #include <legacy/input>
+  #include <legacy/fog-vs>
+
+  layout(location = 1) out vec2 v_uv;
+
+  vec4 vert () {
+    vec4 position;
+    CCVertInput(position);
+    vec4 pos = cc_matProj * cc_matView * position;
+    v_uv = (pos.xy + 1.0) * 0.5;
+
+    return pos;
+  }
+}%
+
+CCProgram unlit-fs %{
+  precision highp float;
+  in vec2 v_uv;
+
+  #pragma rate mainTexture pass
+  uniform sampler2D mainTexture;
+
+  vec4 frag () {
+    return texture(mainTexture, v_uv);
+  }
+
+}%
