@@ -5,7 +5,7 @@ import {
     renderer,
     rendering,
 } from 'cc';
-import { getWindowInfo, WindowInfo } from '../pipeline-data';
+import { getWindowInfo, needClearColor, WindowInfo } from '../pipeline-data';
 const { ccclass } = _decorator;
 
 // implement a custom pipeline
@@ -112,7 +112,7 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
         pass.setViewport(this._viewport);
         // bind output render target
         // 绑定输出渲染目标
-        if (camera.clearFlag & gfx.ClearFlagBit.COLOR) {
+        if (needClearColor(camera)) {
             pass.addRenderTarget(`Color${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, this._clearColor);
         } else {
             pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
