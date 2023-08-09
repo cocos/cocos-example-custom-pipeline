@@ -29,3 +29,7 @@ export function getWindowInfo(camera: renderer.scene.Camera): WindowInfo {
     cclegacy.user.windows.set(camera.window, info);
     return info;
 }
+
+export function needClearColor(camera: renderer.scene.Camera): boolean {
+    return !!(camera.clearFlag & (gfx.ClearFlagBit.COLOR | (gfx.ClearFlagBit.STENCIL << 1)));
+}
