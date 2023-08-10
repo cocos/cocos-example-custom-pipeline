@@ -1,7 +1,8 @@
 {
   "__version__": "1.0.7",
   "macroConfig": {
-    "CUSTOM_PIPELINE_NAME": "MyPipeline"
+    "CUSTOM_PIPELINE_NAME": "GPUDrivenPipeline",
+    "ENABLE_GPU_DRIVEN": true
   },
   "modules": {
     "cache": {
