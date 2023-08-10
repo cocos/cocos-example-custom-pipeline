@@ -180,7 +180,7 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
     private _gpuDrivenEnabled = false;
 }
 
-rendering.setCustomPipeline('MyPipeline', new GPUDrivenPipeline());
+rendering.setCustomPipeline('GPUDrivenPipeline', new GPUDrivenPipeline());
 
 @ccclass('GPUDrivenPipelineComp')
 export class GPUDrivenPipelineComp extends Component {
