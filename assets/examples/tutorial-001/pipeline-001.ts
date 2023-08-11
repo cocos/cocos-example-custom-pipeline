@@ -153,7 +153,7 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
 
 // register pipeline
 // 注册管线
-rendering.setCustomPipeline('MyPipeline', new HelloWorldPipeline());
+rendering.setCustomPipeline('Pipeline001', new HelloWorldPipeline());
 
 @ccclass('pipeline_001')
 export class pipeline_001 extends Component {

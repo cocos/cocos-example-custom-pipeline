@@ -1,7 +1,7 @@
 {
   "__version__": "1.0.7",
   "macroConfig": {
-    "CUSTOM_PIPELINE_NAME": "MyPipeline"
+    "CUSTOM_PIPELINE_NAME": "Pipeline002"
   },
   "modules": {
     "cache": {

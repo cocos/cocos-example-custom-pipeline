@@ -257,7 +257,7 @@ class MoveResourcePipeline implements rendering.PipelineBuilder {
 
 // register pipeline
 // 注册管线
-rendering.setCustomPipeline('MyPipeline', new MoveResourcePipeline());
+rendering.setCustomPipeline('MovePipeline', new MoveResourcePipeline());
 
 @ccclass('pipeline_001')
 export class pipeline_001 extends Component {
