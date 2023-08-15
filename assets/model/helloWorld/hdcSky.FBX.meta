@@ -109,12 +109,11 @@
     },
     "dumpMaterials": true,
     "materialDumpDir": "db://assets/material",
+    "legacyFbxImporter": true,
     "fbx": {
-      "preferLocalTimeSpan": false,
       "smartMaterialEnabled": false,
       "matchMeshNames": false
     },
-    "mountAllAnimationsOnPrefab": true,
     "lods": {
       "enable": false,
       "hasBuiltinLOD": false,
