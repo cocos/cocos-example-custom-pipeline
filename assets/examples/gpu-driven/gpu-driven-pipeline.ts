@@ -21,6 +21,7 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
             this.buildForward(ppl, camera, info.id, info.width, info.height);
         }
         this._frameID = (this._frameID + 1) % 2;
+        this._cullingID = 0;
     }
     private prepareCameraResources (
         ppl: rendering.BasicPipeline,
@@ -93,8 +94,9 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
         id: number,
         width: number,
         height: number, 
+        bUseOcclusion: boolean,
         bMainPass: boolean): void {
-        const hzbName = 'HiZBuffer';
+        const hzbName = bUseOcclusion ? 'HiZBuffer' : '';
         ppl.addBuiltinGpuCullingPass(cullingID, camera, hzbName, null, bMainPass);
 
         const pass = ppl.addRenderPass(width, height, 'default');
@@ -136,8 +138,10 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
                 rendering.SceneFlags.BLEND);
         }
 
-        const depthStencil = bMainPass ? this._prevDepthStencil : this._depthStencil;
-        ppl.addBuiltinHzbGenerationPass(depthStencil, hzbName);
+        if (bUseOcclusion) {
+            const targetHzbName = hzbName + String(cullingID);
+            ppl.addBuiltinHzbGenerationPass(this._depthStencil, targetHzbName);
+        }
     }
 
     private buildForward (
@@ -163,10 +167,11 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
 
         if (this._gpuDrivenEnabled) {
             // add main pass
-            this.addGPUDrivenPass(ppl as rendering.Pipeline, 0, camera, id, width, height, true);
+            this.addGPUDrivenPass(ppl as rendering.Pipeline, this._cullingID, camera, id, width, height, true, true);
 
             // add post pass
-            this.addGPUDrivenPass(ppl as rendering.Pipeline, 1, camera, id, width, height, false);
+            this.addGPUDrivenPass(ppl as rendering.Pipeline, this._cullingID, camera, id, width, height, true, false);
+            this._cullingID++;
         } else {
             this.addForwardPass(ppl as rendering.Pipeline, camera, id, width, height);
         }
@@ -178,6 +183,7 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
     private _depthStencil = '';
     private _prevDepthStencil = '';
     private _gpuDrivenEnabled = false;
+    private _cullingID = 0;
 }
 
 rendering.setCustomPipeline('GPUDrivenPipeline', new GPUDrivenPipeline());
