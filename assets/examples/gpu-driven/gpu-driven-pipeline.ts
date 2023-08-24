@@ -20,7 +20,6 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
             const info = this.prepareCameraResources(ppl, camera);
             this.buildForward(ppl, camera, info.id, info.width, info.height);
         }
-        this._frameID = (this._frameID + 1) % 2;
         this._cullingID = 0;
     }
     private prepareCameraResources (
@@ -44,13 +43,11 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
     }
     private initCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
         ppl.addRenderWindow(`Color${id}`, gfx.Format.BGRA8, width, height, camera.window);
-        ppl.addDepthStencil(`DepthStencil${id}_0`, gfx.Format.DEPTH_STENCIL, width, height, rendering.ResourceResidency.PERSISTENT);
-        ppl.addDepthStencil(`DepthStencil${id}_1`, gfx.Format.DEPTH_STENCIL, width, height, rendering.ResourceResidency.PERSISTENT);
+        ppl.addDepthStencil(`DepthStencil${id}`, gfx.Format.DEPTH_STENCIL, width, height, rendering.ResourceResidency.PERSISTENT);
     }
     private updateCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
         ppl.updateRenderWindow(`Color${id}`, camera.window);
-        ppl.updateDepthStencil(`DepthStencil${id}_0`, width, height);
-        ppl.updateDepthStencil(`DepthStencil${id}_1`, width, height);
+        ppl.updateDepthStencil(`DepthStencil${id}`, width, height);
     }
 
     private addForwardPass(ppl: rendering.Pipeline,
@@ -109,7 +106,7 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
         if (camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL) {
             pass.addDepthStencil(
                 this._depthStencil,
-                gfx.LoadOp.CLEAR,
+                bMainPass ? gfx.LoadOp.CLEAR : gfx.LoadOp.LOAD,
                 gfx.StoreOp.STORE,
                 camera.clearDepth,
                 camera.clearStencil,
@@ -150,9 +147,7 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
         id: number,
         width: number,
         height: number): void {
-        const prevFrameID = (this._frameID + 1) % 2;
-        this._prevDepthStencil = `DepthStencil${id}_${prevFrameID}`;
-        this._depthStencil = `DepthStencil${id}_${this._frameID}`;
+        this._depthStencil = `DepthStencil${id}`;
         // Camera
         this._clearColor.x = camera.clearColor.x;
         this._clearColor.y = camera.clearColor.y;
@@ -179,9 +174,7 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
 
     readonly _clearColor = new gfx.Color(0, 0, 0, 1);
     readonly _viewport = new gfx.Viewport();
-    private _frameID = 0;
     private _depthStencil = '';
-    private _prevDepthStencil = '';
     private _gpuDrivenEnabled = false;
     private _cullingID = 0;
 }
