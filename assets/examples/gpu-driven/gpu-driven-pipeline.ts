@@ -59,6 +59,8 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
             pass.setViewport(this._viewport);
             if (camera.clearFlag & gfx.ClearFlagBit.COLOR) {
                 pass.addRenderTarget(`Color${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, this._clearColor);
+        } else if (camera.clearFlag & renderer.scene.SKYBOX_FLAG) {
+            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.DISCARD);
             } else {
                 pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
             }
@@ -100,6 +102,8 @@ class GPUDrivenPipeline implements rendering.PipelineBuilder {
         pass.setViewport(this._viewport);
         if (camera.clearFlag & gfx.ClearFlagBit.COLOR) {
             pass.addRenderTarget(`Color${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, this._clearColor);
+        } else if (camera.clearFlag & renderer.scene.SKYBOX_FLAG) {
+            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.DISCARD);
         } else {
             pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
         }
