@@ -217,7 +217,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
                 .addSceneOfCamera(
                     camera,
                     new rendering.LightInfo(),
-                    rendering.SceneFlags.BLEND);
+                    rendering.SceneFlags.BLEND | rendering.SceneFlags.UI);
         }
     }
     // internal cached resources
