@@ -2,6 +2,7 @@ import {
     _decorator,
     cclegacy,
     Component,
+    geometry,
     gfx,
     renderer,
     rendering,
@@ -137,6 +138,54 @@ class CsmPipeline implements rendering.PipelineBuilder {
                 rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
         }
     }
+
+    private cullLights(scene: renderer.RenderScene, frustum: geometry.Frustum) {
+        this.lights.length = 0;
+        this.spotLights.length = 0;
+        // spot lights
+        for (let i = 0; i < scene.spotLights.length; i++) {
+            const light = scene.spotLights[i];
+            if (light.baked) {
+                continue;
+            }
+            geometry.Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
+            if (geometry.intersect.sphereFrustum(this._sphere, frustum)) {
+                this.lights.push(light);
+                this.spotLights.push(light);
+            }
+        }
+        // sphere lights
+        for (let i = 0; i < scene.sphereLights.length; i++) {
+            const light = scene.sphereLights[i];
+            if (light.baked) {
+                continue;
+            }
+            geometry.Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
+            if (geometry.intersect.sphereFrustum(this._sphere, frustum)) {
+                this.lights.push(light);
+            }
+        }
+        // point lights
+        for (let i = 0; i < scene.pointLights.length; i++) {
+            const light = scene.pointLights[i];
+            if (light.baked) {
+                continue;
+            }
+            geometry.Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
+            if (geometry.intersect.sphereFrustum(this._sphere, frustum)) {
+                this.lights.push(light);
+            }
+        }
+        // ranged dir lights
+        for (let i = 0; i < scene.rangedDirLights.length; i++) {
+            const light = scene.rangedDirLights[i];
+            geometry.AABB.transform(this._boundingBox, this._rangedDirLightBoundingBox, light.node!.getWorldMatrix());
+            if (geometry.intersect.aabbFrustum(this._boundingBox, frustum)) {
+                this.lights.push(light);
+            }
+        }
+    }
+
     // build forward lighting pipeline
     // NOTE: this is just a simple example, you can implement your own pipeline here
     // In this example, we have turned off shadowmap in the scene
@@ -152,6 +201,9 @@ class CsmPipeline implements rendering.PipelineBuilder {
 
         const scene = camera.scene;
         const mainLight = scene.mainLight;
+
+        // cull lights
+        this.cullLights(scene, camera.frustum);
 
         // CSM
         const enableCSM = mainLight && mainLight.shadowEnabled;
@@ -211,6 +263,16 @@ class CsmPipeline implements rendering.PipelineBuilder {
                     camera,
                     new rendering.LightInfo(),
                     rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK);
+
+            // add lights
+            for (const light of this.lights) {
+                pass.addQueue(rendering.QueueHint.BLEND, 'forward-add')
+                    .addSceneOfCamera(
+                        camera,
+                        new rendering.LightInfo(light),
+                        rendering.SceneFlags.BLEND | rendering.SceneFlags.DEFAULT_LIGHTING);
+            }
+
             // add transparent queue
             // 添加透明队列
             pass.addQueue(rendering.QueueHint.BLEND)
@@ -222,9 +284,17 @@ class CsmPipeline implements rendering.PipelineBuilder {
     }
     // internal cached resources
     // 管线内部缓存资源
+    // pipeline
     readonly _clearColor = new gfx.Color(0, 0, 0, 1);
     readonly _viewport = new gfx.Viewport();
     readonly _flipY = cclegacy.director.root.device.capabilities.screenSpaceSignY;
+    // scene
+    readonly _sphere = geometry.Sphere.create(0, 0, 0, 1);
+    readonly _boundingBox = new geometry.AABB();
+    readonly _rangedDirLightBoundingBox = new geometry.AABB(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
+    // valid lights
+    readonly lights: renderer.scene.Light[] = [];
+    readonly spotLights: renderer.scene.SpotLight[] = [];
 }
 
 // register pipeline
