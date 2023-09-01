@@ -12,7 +12,7 @@ const { ccclass } = _decorator;
 
 // implement a custom pipeline
 // 如何实现一个自定义渲染管线
-class CsmPipeline implements rendering.PipelineBuilder {
+class MultiLightPipeline implements rendering.PipelineBuilder {
     // implemenation of rendering.PipelineBuilder interface
     // 实现 rendering.PipelineBuilder 接口
     public setup (cameras: renderer.scene.Camera[], ppl: rendering.BasicPipeline): void {
@@ -124,6 +124,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
         const width = ppl.pipelineSceneData.shadows.size.x;
         const height = ppl.pipelineSceneData.shadows.size.y;
         const pass = ppl.addRenderPass(width, height, 'default');
+        pass.name = 'CSM';
         pass.addRenderTarget(`ShadowMap${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, new gfx.Color(1, 1, 1, 1));
         pass.addDepthStencil(`ShadowDepth${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.DISCARD);
         const csmLevel = ppl.pipelineSceneData.csmSupported ? light.csmLevel : 1;
@@ -229,6 +230,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
         // 前向光照
         {
             const pass = ppl.addRenderPass(width, height, 'default');
+            pass.name = 'ForwardPass';
             // set viewport
             // 设置视口
             pass.setViewport(this._viewport);
@@ -270,7 +272,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
                     .addSceneOfCamera(
                         camera,
                         new rendering.LightInfo(light),
-                        rendering.SceneFlags.BLEND | rendering.SceneFlags.DEFAULT_LIGHTING);
+                        rendering.SceneFlags.BLEND);
             }
 
             // add transparent queue
@@ -299,7 +301,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
 
 // register pipeline
 // 注册管线
-rendering.setCustomPipeline('Pipeline003', new CsmPipeline());
+rendering.setCustomPipeline('Pipeline003', new MultiLightPipeline());
 
 @ccclass('pipeline_003_multi_light')
 export class pipeline_003_multi_light extends Component {
