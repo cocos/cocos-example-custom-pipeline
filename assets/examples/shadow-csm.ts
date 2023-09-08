@@ -30,7 +30,8 @@ const _viewport = new gfx.Viewport();
 export function buildCascadedShadowMapPass(ppl: rendering.BasicPipeline,
     id: number,
     light: renderer.scene.DirectionalLight,
-    camera: renderer.scene.Camera) {
+    camera: renderer.scene.Camera,
+    newAPI = false) {
     const width = ppl.pipelineSceneData.shadows.size.x;
     const height = ppl.pipelineSceneData.shadows.size.y;
     const pass = ppl.addRenderPass(width, height, 'default');
@@ -42,10 +43,17 @@ export function buildCascadedShadowMapPass(ppl: rendering.BasicPipeline,
         getMainLightViewport(light, width, height, level, _viewport);
         const queue = pass.addQueue(rendering.QueueHint.NONE, 'shadow-caster');
         queue.setViewport(_viewport);
-        // queue.addSceneCulledByDirectionalLight(camera,
-        //     SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER,
-        //     light, level);
-        queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level, true),
-            rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
+        if (newAPI) {
+            queue.addSceneCulledByDirectionalLight(
+                camera,
+                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER,
+                light, level)
+                .setBuiltinDirectionalLightViewConstants(camera, light, level);
+        } else {
+            queue.addSceneOfCamera(
+                camera,
+                new rendering.LightInfo(light, level, true),
+                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
+        }
     }
 }

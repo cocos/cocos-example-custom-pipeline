@@ -179,6 +179,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
     }
     // internal cached resources
     // 管线内部缓存资源
+    readonly _newAPI = false;
     readonly _clearColor = new gfx.Color(0, 0, 0, 1);
     readonly _viewport = new gfx.Viewport();
     readonly _flipY = cclegacy.director.root.device.capabilities.screenSpaceSignY;
