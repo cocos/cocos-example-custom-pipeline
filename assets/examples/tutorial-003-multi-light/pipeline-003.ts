@@ -8,6 +8,7 @@ import {
     rendering,
 } from 'cc';
 import { getWindowInfo, needClearColor, WindowInfo } from '../pipeline-data';
+import { buildCascadedShadowMapPass } from '../shadow-csm';
 const { ccclass } = _decorator;
 
 // implement a custom pipeline
@@ -116,29 +117,6 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
         vp.width = Math.max(1, vp.width);
         vp.height = Math.max(1, vp.height);
     }
-    private buildCascadedShadowMapPass (
-        ppl: rendering.BasicPipeline,
-        id: number,
-        light: renderer.scene.DirectionalLight,
-        camera: renderer.scene.Camera): void {
-        const width = ppl.pipelineSceneData.shadows.size.x;
-        const height = ppl.pipelineSceneData.shadows.size.y;
-        const pass = ppl.addRenderPass(width, height, 'default');
-        pass.name = 'CSM';
-        pass.addRenderTarget(`ShadowMap${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, new gfx.Color(1, 1, 1, 1));
-        pass.addDepthStencil(`ShadowDepth${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.DISCARD);
-        const csmLevel = ppl.pipelineSceneData.csmSupported ? light.csmLevel : 1;
-        for (let level = 0; level !== csmLevel; ++level) {
-            this.getMainLightViewport(light, width, height, level, this._viewport);
-            const queue = pass.addQueue(rendering.QueueHint.NONE, 'shadow-caster');
-            queue.setViewport(this._viewport);
-            // queue.addSceneCulledByDirectionalLight(camera,
-            //     SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER,
-            //     light, level);
-            queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level, true),
-                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
-        }
-    }
 
     private cullLights(scene: renderer.RenderScene, frustum: geometry.Frustum) {
         this.lights.length = 0;
@@ -209,7 +187,7 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
         // CSM
         const enableCSM = mainLight && mainLight.shadowEnabled;
         if (enableCSM) {
-            this.buildCascadedShadowMapPass(ppl, id, mainLight, camera);
+            buildCascadedShadowMapPass(ppl, id, mainLight, camera);
         }
 
         // prepare camera clear color
