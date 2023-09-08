@@ -135,7 +135,7 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
             // queue.addSceneCulledByDirectionalLight(camera,
             //     SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER,
             //     light, level);
-            queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level),
+            queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level, true),
                 rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
         }
     }
