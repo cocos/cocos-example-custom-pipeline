@@ -95,28 +95,6 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
         ppl.updateRenderTarget(`ShadowMap${id}`, shadowSize.x, shadowSize.y);
         ppl.updateDepthStencil(`ShadowDepth${id}`, shadowSize.x, shadowSize.y);
     }
-    private getMainLightViewport (light: renderer.scene.DirectionalLight, w: number, h: number, level: number,
-        vp: gfx.Viewport): void {
-        if (light.shadowFixedArea || light.csmLevel === renderer.scene.CSMLevel.LEVEL_1) {
-            vp.left = 0;
-            vp.top = 0;
-            vp.width = Math.trunc(w);
-            vp.height = Math.trunc(h);
-        } else {
-            vp.left = Math.trunc(level % 2 * 0.5 * w);
-            if (this._flipY > 0) {
-                vp.top = Math.trunc((1 - Math.floor(level / 2)) * 0.5 * h);
-            } else {
-                vp.top = Math.trunc(Math.floor(level / 2) * 0.5 * h);
-            }
-            vp.width = Math.trunc(0.5 * w);
-            vp.height = Math.trunc(0.5 * h);
-        }
-        vp.left = Math.max(0, vp.left);
-        vp.top = Math.max(0, vp.top);
-        vp.width = Math.max(1, vp.width);
-        vp.height = Math.max(1, vp.height);
-    }
 
     private cullLights(scene: renderer.RenderScene, frustum: geometry.Frustum) {
         this.lights.length = 0;

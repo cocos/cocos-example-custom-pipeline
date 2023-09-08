@@ -7,6 +7,7 @@ import {
     rendering,
 } from 'cc';
 import { getWindowInfo, needClearColor, WindowInfo } from '../pipeline-data';
+import { buildCascadedShadowMapPass } from '../shadow-csm';
 const { ccclass } = _decorator;
 
 // implement a custom pipeline
@@ -93,50 +94,6 @@ class CsmPipeline implements rendering.PipelineBuilder {
         ppl.updateRenderTarget(`ShadowMap${id}`, shadowSize.x, shadowSize.y);
         ppl.updateDepthStencil(`ShadowDepth${id}`, shadowSize.x, shadowSize.y);
     }
-    private getMainLightViewport (light: renderer.scene.DirectionalLight, w: number, h: number, level: number,
-        vp: gfx.Viewport): void {
-        if (light.shadowFixedArea || light.csmLevel === renderer.scene.CSMLevel.LEVEL_1) {
-            vp.left = 0;
-            vp.top = 0;
-            vp.width = Math.trunc(w);
-            vp.height = Math.trunc(h);
-        } else {
-            vp.left = Math.trunc(level % 2 * 0.5 * w);
-            if (this._flipY > 0) {
-                vp.top = Math.trunc((1 - Math.floor(level / 2)) * 0.5 * h);
-            } else {
-                vp.top = Math.trunc(Math.floor(level / 2) * 0.5 * h);
-            }
-            vp.width = Math.trunc(0.5 * w);
-            vp.height = Math.trunc(0.5 * h);
-        }
-        vp.left = Math.max(0, vp.left);
-        vp.top = Math.max(0, vp.top);
-        vp.width = Math.max(1, vp.width);
-        vp.height = Math.max(1, vp.height);
-    }
-    private buildCascadedShadowMapPass (
-        ppl: rendering.BasicPipeline,
-        id: number,
-        light: renderer.scene.DirectionalLight,
-        camera: renderer.scene.Camera): void {
-        const width = ppl.pipelineSceneData.shadows.size.x;
-        const height = ppl.pipelineSceneData.shadows.size.y;
-        const pass = ppl.addRenderPass(width, height, 'default');
-        pass.addRenderTarget(`ShadowMap${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, new gfx.Color(1, 1, 1, 1));
-        pass.addDepthStencil(`ShadowDepth${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.DISCARD);
-        const csmLevel = ppl.pipelineSceneData.csmSupported ? light.csmLevel : 1;
-        for (let level = 0; level !== csmLevel; ++level) {
-            this.getMainLightViewport(light, width, height, level, this._viewport);
-            const queue = pass.addQueue(rendering.QueueHint.NONE, 'shadow-caster');
-            queue.setViewport(this._viewport);
-            // queue.addSceneCulledByDirectionalLight(camera,
-            //     SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER,
-            //     light, level);
-            queue.addSceneOfCamera(camera, new rendering.LightInfo(light, level, true),
-                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
-        }
-    }
     // build forward lighting pipeline
     // NOTE: this is just a simple example, you can implement your own pipeline here
     // In this example, we have turned off shadowmap in the scene
@@ -156,7 +113,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
         // CSM
         const enableCSM = mainLight && mainLight.shadowEnabled;
         if (enableCSM) {
-            this.buildCascadedShadowMapPass(ppl, id, mainLight, camera);
+            buildCascadedShadowMapPass(ppl, id, mainLight, camera);
         }
 
         // prepare camera clear color
