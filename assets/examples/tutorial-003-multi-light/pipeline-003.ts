@@ -16,7 +16,7 @@ const { ccclass } = _decorator;
 class MultiLightPipeline implements rendering.PipelineBuilder {
     // implemenation of rendering.PipelineBuilder interface
     // 实现 rendering.PipelineBuilder 接口
-    public setup (cameras: renderer.scene.Camera[], ppl: rendering.BasicPipeline): void {
+    public setup(cameras: renderer.scene.Camera[], ppl: rendering.BasicPipeline): void {
         for (let i = 0; i < cameras.length; i++) {
             const camera = cameras[i];
             // skip invalid camera
@@ -35,7 +35,7 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
     }
     // internal methods
     // 管线内部方法
-    private prepareCameraResources (
+    private prepareCameraResources(
         ppl: rendering.BasicPipeline,
         camera: renderer.scene.Camera): WindowInfo {
         // get window info
@@ -71,21 +71,21 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
     private supportsR32FloatTexture(device: gfx.Device) {
         return (device.getFormatFeatures(gfx.Format.R32F) & (gfx.FormatFeatureBit.RENDER_TARGET | gfx.FormatFeatureBit.SAMPLED_TEXTURE))
             === (gfx.FormatFeatureBit.RENDER_TARGET | gfx.FormatFeatureBit.SAMPLED_TEXTURE)
-        && !(device.gfxAPI === gfx.API.WEBGL); // wegl 1  Single-channel float type is not supported under webgl1, so it is excluded
+            && !(device.gfxAPI === gfx.API.WEBGL); // wegl 1  Single-channel float type is not supported under webgl1, so it is excluded
     }
 
-    private initCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
+    private initCameraResources(ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
         // all resource can be initialized here
         // 所有资源可以在这里初始化
         ppl.addRenderWindow(`Color${id}`, gfx.Format.BGRA8, width, height, camera.window);
         ppl.addDepthStencil(`DepthStencil${id}`, gfx.Format.DEPTH_STENCIL, width, height);
         // CSM
-        const shadowFormat  = this.supportsR32FloatTexture(ppl.device) ? gfx.Format.R32F : gfx.Format.RGBA8;
+        const shadowFormat = this.supportsR32FloatTexture(ppl.device) ? gfx.Format.R32F : gfx.Format.RGBA8;
         const shadowSize = ppl.pipelineSceneData.shadows.size;
         ppl.addRenderTarget(`ShadowMap${id}`, shadowFormat, shadowSize.x, shadowSize.y);
         ppl.addDepthStencil(`ShadowDepth${id}`, gfx.Format.DEPTH_STENCIL, shadowSize.x, shadowSize.y);
     }
-    private updateCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
+    private updateCameraResources(ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
         // all resource can be updated here
         // 所有资源可以在这里更新
         ppl.updateRenderWindow(`Color${id}`, camera.window);
@@ -149,7 +149,7 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
     // 构建前向光照管线
     // 注意：这只是一个简单的例子，你可以在这里实现自己的管线
     // 在这个例子中，我们已经在场景中关闭了阴影贴图
-    private buildForward (
+    private buildForward(
         ppl: rendering.BasicPipeline,
         camera: renderer.scene.Camera,
         id: number, // window id

@@ -40,7 +40,7 @@
       },
       "physics": {
         "_value": true,
-        "_option": "physics-ammo"
+        "_option": "physics-physx"
       },
       "physics-ammo": {
         "_value": false
@@ -145,7 +145,7 @@
       "particle",
       "particle-2d",
       "physics-2d-box2d",
-      "physics-ammo",
+      "physics-physx",
       "primitive",
       "profiler",
       "skeletal-animation",

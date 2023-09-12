@@ -1,6 +1,6 @@
 import { cclegacy, gfx, renderer, rendering } from "cc";
 
-export function getMainLightViewport (
+export function getMainLightViewport(
     light: renderer.scene.DirectionalLight,
     w: number, h: number, level: number,
     vp: gfx.Viewport): void {
@@ -44,16 +44,21 @@ export function buildCascadedShadowMapPass(ppl: rendering.BasicPipeline,
         const queue = pass.addQueue(rendering.QueueHint.NONE, 'shadow-caster');
         queue.setViewport(_viewport);
         if (newAPI) {
-            queue.addSceneCulledByDirectionalLight(
-                camera,
-                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER,
-                light, level)
-                .setBuiltinDirectionalLightViewConstants(camera, light, level);
+            queue
+                .addScene(
+                    camera,
+                    rendering.SceneFlags.OPAQUE |
+                    rendering.SceneFlags.MASK |
+                    rendering.SceneFlags.SHADOW_CASTER)
+                .useLightFrustum(light, level);
         } else {
-            queue.addSceneOfCamera(
-                camera,
-                new rendering.LightInfo(light, level, true),
-                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER);
+            queue
+                .addSceneOfCamera(
+                    camera,
+                    new rendering.LightInfo(light, level, true),
+                    rendering.SceneFlags.OPAQUE |
+                    rendering.SceneFlags.MASK |
+                    rendering.SceneFlags.SHADOW_CASTER);
         }
     }
 }
