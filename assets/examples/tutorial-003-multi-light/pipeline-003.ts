@@ -224,11 +224,25 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
 
             // add lights
             for (const light of this.lights) {
-                pass.addQueue(rendering.QueueHint.BLEND, 'forward-add')
-                    .addSceneOfCamera(
-                        camera,
-                        new rendering.LightInfo(light),
-                        rendering.SceneFlags.BLEND);
+                const queue = pass.addQueue(rendering.QueueHint.BLEND, 'forward-add');
+                switch (light.type) {
+                    case renderer.scene.LightType.SPHERE:
+                        queue.name = 'sphere-light';
+                        break;
+                    case renderer.scene.LightType.SPOT:
+                        queue.name = 'spot-light';
+                        break;
+                    case renderer.scene.LightType.POINT:
+                        queue.name = 'point-light';
+                        break;
+                    case renderer.scene.LightType.RANGED_DIRECTIONAL:
+                        queue.name = 'ranged-directional-light';
+                        break;
+                }
+                queue.addScene(
+                    camera,
+                    rendering.SceneFlags.BLEND,
+                    light);
             }
 
             // add transparent queue
@@ -243,7 +257,7 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
     // internal cached resources
     // 管线内部缓存资源
     // pipeline
-    readonly _newAPI = false;
+    readonly _newAPI = true;
     readonly _clearColor = new gfx.Color(0, 0, 0, 1);
     readonly _viewport = new gfx.Viewport();
     readonly _flipY = cclegacy.director.root.device.capabilities.screenSpaceSignY;

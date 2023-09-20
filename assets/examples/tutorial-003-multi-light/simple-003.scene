@@ -30,6 +30,9 @@
       },
       {
         "__id__": 15
+      },
+      {
+        "__id__": 18
       }
     ],
     "_active": true,
@@ -64,7 +67,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 18
+      "__id__": 21
     },
     "_id": "fe88b75f-d6e2-405b-9827-5576ce2b14b7"
   },
@@ -577,30 +580,112 @@
     "_castShadow": false
   },
   {
-    "__type__": "cc.SceneGlobals",
-    "ambient": {
-      "__id__": 19
+    "__type__": "cc.Node",
+    "_name": "Sphere Light",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "_parent": {
+      "__id__": 1
     },
-    "shadows": {
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 19
+      }
+    ],
+    "_prefab": null,
+    "_lpos": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 1,
+      "z": 3
+    },
+    "_lrot": {
+      "__type__": "cc.Quat",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "_lscale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_mobility": 0,
+    "_layer": 1073741824,
+    "_euler": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_id": "b86AR1ElpMj7UXnoeo/lXX"
+  },
+  {
+    "__type__": "cc.SphereLight",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 18
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 0,
+      "g": 255,
+      "b": 0,
+      "a": 255
+    },
+    "_useColorTemperature": false,
+    "_colorTemperature": 6550,
+    "_staticSettings": {
       "__id__": 20
     },
-    "_skybox": {
-      "__id__": 21
-    },
-    "fog": {
+    "_visibility": -325058561,
+    "_size": 0.15,
+    "_luminanceHDR": 1913.8445799108247,
+    "_luminance": 1913.8445799108247,
+    "_luminanceLDR": 498.3970260184439,
+    "_term": 0,
+    "_range": 2,
+    "_id": "e8aoVnzNdJjrPo82KPHmkp"
+  },
+  {
+    "__type__": "cc.StaticLightSettings",
+    "_baked": false,
+    "_editorOnly": false,
+    "_castShadow": false
+  },
+  {
+    "__type__": "cc.SceneGlobals",
+    "ambient": {
       "__id__": 22
     },
-    "octree": {
+    "shadows": {
       "__id__": 23
     },
-    "skin": {
+    "_skybox": {
       "__id__": 24
     },
-    "lightProbeInfo": {
+    "fog": {
       "__id__": 25
     },
-    "postSettings": {
+    "octree": {
       "__id__": 26
+    },
+    "skin": {
+      "__id__": 27
+    },
+    "lightProbeInfo": {
+      "__id__": 28
+    },
+    "postSettings": {
+      "__id__": 29
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false
