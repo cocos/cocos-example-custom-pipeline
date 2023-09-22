@@ -567,7 +567,7 @@
     "_term": 0,
     "_range": 5,
     "_spotAngle": 51,
-    "_shadowEnabled": false,
+    "_shadowEnabled": true,
     "_shadowPcf": 0,
     "_shadowBias": 0.00001,
     "_shadowNormalBias": 0,
