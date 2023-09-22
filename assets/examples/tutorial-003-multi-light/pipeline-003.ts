@@ -2,7 +2,6 @@ import {
     _decorator,
     cclegacy,
     Component,
-    geometry,
     gfx,
     renderer,
     rendering,
