@@ -1,0 +1,47 @@
+// Effect Syntax Guide: https://docs.cocos.com/creator/manual/zh/shader/index.html
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - vert: standard-vs:vert
+      frag: standard-fs
+      pass: subpassInOut
+      subpass: subpass1
+      phase: subpass1-phase0
+}%
+
+
+CCProgram standard-vs %{
+  precision highp float;
+  #include <legacy/input>
+  #include <builtin/uniforms/cc-global>
+  #include <legacy/decode-base>
+  #include <legacy/local-batch>
+  #include <legacy/input>
+  #include <legacy/fog-vs>
+
+
+  vec4 vert () {
+    vec4 position;
+    CCVertInput(position);
+
+    return cc_matProj * cc_matView * position;
+  }
+}%
+
+
+CCProgram standard-fs %{
+  precision mediump float;
+  
+  #pragma subpass
+  #pragma subpassColor out color
+  #pragma subpassColor in cInZ
+  #pragma subpassColor in cInA
+
+  void main () {
+    vec4 v0 = subpassLoad(cInZ);
+    vec4 v1 = subpassLoad(cInA);
+    color = v1 * 0.8 + v0 * 0.2;
+  }
+}%
