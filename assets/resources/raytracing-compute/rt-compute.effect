@@ -1,0 +1,60 @@
+// Effect Syntax Guide: https://docs.cocos.com/creator/manual/zh/shader/index.html
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - pass: rt1w
+      compute: rt-comp
+}%
+
+CCProgram rt-comp %{
+  precision highp float;
+  precision mediump image2D;
+  layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+
+  #pragma rate co pass
+  layout (rgba8) writeonly uniform image2D co;
+
+  struct Ray {
+    vec3 origin;
+    vec3 direction;
+  };
+
+  float hit_sphere(vec3 center, float radius, Ray r) {
+    vec3 oc = r.origin - center;
+    float a = dot(r.direction, r.direction);
+    float b = 2.0*dot(oc, r.direction);
+    float c = dot(oc, oc) - radius*radius;
+    float discriminant = b*b - 4*a*c;
+    return discriminant < 0.F ? -1.F : -b - sqrt(discriminant);
+  }
+
+  vec4 ray_color(Ray r) {
+    float t = hit_sphere(vec3(0, 0, 1), 0.5, r);
+    if(t > 0.0) {
+      vec3 N = r.origin + t * r.direction - vec3(0.0, 0.0, 1.0);
+      return vec4(0.5 * (N + vec3(1.0, 1.0, 1.0)), 1.0);
+    }
+    ivec2 size = imageSize(co);
+    uint currY = gl_GlobalInvocationID.y;
+    float ratio = float(currY) / float(size.y);
+    vec3 res = (1 - ratio) * vec3(1.0, 1.0, 1.0) + ratio * vec3(0.5, 0.7, 1.0);
+    return vec4(res, 1.0);
+    
+  }
+
+  void main () {
+    Ray r;
+    r.origin = vec3(0.0, 0.0, 0.0);
+
+    ivec2 size = imageSize(co);
+    float aspect = float(size.x) / float(size.y);
+    vec2 ndc = vec2(float(gl_GlobalInvocationID.x) / float(size.x) * 2 - 1.0, float(gl_GlobalInvocationID.y) / float(size.y) * 2 - 1.0);
+    ndc.x *= aspect;
+    r.direction = normalize(vec3(ndc, 1.0));
+
+    vec4 color = ray_color(r);
+    imageStore(co, ivec2(gl_GlobalInvocationID.xy), color);
+  }
+}%
