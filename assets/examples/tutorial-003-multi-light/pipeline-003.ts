@@ -2,7 +2,6 @@ import {
     _decorator,
     cclegacy,
     Component,
-    geometry,
     gfx,
     renderer,
     rendering,
@@ -178,11 +177,11 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
 
             // add multi-lights
             // 添加多光源
-            this.lighting.addLightPasses(camera, pass);
+            const pass2 = this.lighting.addLightPasses(id, width, height, camera, ppl, pass);
 
             // add transparent queue
             // 添加透明队列
-            pass.addQueue(rendering.QueueHint.BLEND)
+            pass2.addQueue(rendering.QueueHint.BLEND)
                 .addSceneOfCamera(
                     camera,
                     new rendering.LightInfo(),

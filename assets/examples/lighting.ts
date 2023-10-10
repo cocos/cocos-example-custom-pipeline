@@ -1,5 +1,6 @@
 import {
     geometry,
+    gfx,
     renderer,
     rendering,
 } from 'cc';
@@ -7,7 +8,7 @@ import {
 export class Lighting {
     public cullLights(scene: renderer.RenderScene, frustum: geometry.Frustum) {
         this.lights.length = 0;
-        this.spotLights.length = 0;
+        this.shadowEnabledSpotLights.length = 0;
         // spot lights
         for (let i = 0; i < scene.spotLights.length; i++) {
             const light = scene.spotLights[i];
@@ -17,7 +18,11 @@ export class Lighting {
             geometry.Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
             if (geometry.intersect.sphereFrustum(this._sphere, frustum)) {
                 this.lights.push(light);
-                this.spotLights.push(light);
+                if (light.shadowEnabled) {
+                    this.shadowEnabledSpotLights.push(light);
+                } else {
+                    this.lights.push(light);
+                }
             }
         }
         // sphere lights
@@ -51,7 +56,13 @@ export class Lighting {
             }
         }
     }
-    public addLightPasses(camera: renderer.scene.Camera, pass: rendering.BasicRenderPassBuilder) {
+    public addLightPasses(
+        id: number, // window id
+        width: number,
+        height: number,
+        camera: renderer.scene.Camera,
+        ppl: rendering.BasicPipeline,
+        pass: rendering.BasicRenderPassBuilder): rendering.BasicRenderPassBuilder {
         for (const light of this.lights) {
             const queue = pass.addQueue(rendering.QueueHint.BLEND, 'forward-add');
             switch (light.type) {
@@ -73,10 +84,37 @@ export class Lighting {
                 rendering.SceneFlags.BLEND,
                 light);
         }
+
+        for (const light of this.shadowEnabledSpotLights) {
+            const shadowMapSize = ppl.pipelineSceneData.shadows.size;
+            const shadowPass = ppl.addRenderPass(shadowMapSize.x, shadowMapSize.y, 'default');
+            shadowPass.name = 'SpotlightShadowPass';
+            shadowPass.addRenderTarget(`ShadowMap${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, new gfx.Color(1, 1, 1, 1));
+            shadowPass.addDepthStencil(`ShadowDepth${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.DISCARD);
+            shadowPass.addQueue(rendering.QueueHint.NONE, 'shadow-caster')
+                .addScene(camera,
+                    rendering.SceneFlags.OPAQUE |
+                    rendering.SceneFlags.MASK |
+                    rendering.SceneFlags.SHADOW_CASTER)
+                .useLightFrustum(light);
+
+            pass = ppl.addRenderPass(width, height, 'default');
+            pass.name = 'SpotlightWithShadowMap';
+            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
+            pass.addDepthStencil(`DepthStencil${id}`, gfx.LoadOp.LOAD);
+            pass.addTexture(`ShadowMap${id}`, 'cc_spotShadowMap');
+            const queue = pass.addQueue(rendering.QueueHint.BLEND, 'forward-add');
+            queue.addScene(
+                camera,
+                rendering.SceneFlags.BLEND,
+                light);
+        }
+
+        return pass;
     }
     // valid lights
     private readonly lights: renderer.scene.Light[] = [];
-    private readonly spotLights: renderer.scene.SpotLight[] = [];
+    private readonly shadowEnabledSpotLights: renderer.scene.SpotLight[] = [];
     private readonly _sphere = geometry.Sphere.create(0, 0, 0, 1);
     private readonly _boundingBox = new geometry.AABB();
     private readonly _rangedDirLightBoundingBox = new geometry.AABB(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
