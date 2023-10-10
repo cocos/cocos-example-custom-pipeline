@@ -35,6 +35,7 @@ function addOrUpdateStorageTexture(name: string, format: gfx.Format, width: numb
 
 const matArr: { name: string, path: string }[] = [
     { name: 'rt1w', path: 'raytracing-compute/rt-compute' },
+    { name: 'swizzleQuad', path: 'raytracing-compute/rt-swizzle' },
 ];
 
 const materialMap = new Map<string, Material>();
@@ -137,8 +138,16 @@ class RaytracingByComputePipeline implements rendering.PipelineBuilder {
         computePass.addStorageImage("storage", rendering.AccessType.WRITE, "co");
         computePass.addQueue().addDispatch(width / 8, height / 4, 1, materialMap.get("rt1w"));
 
-        pipeline.addCopyPass([new CopyPair("storage", `Color${id}`, 1, 1, 0, 0, 0, 0, 0, 0)]);
-
+        const renderTarget = `Color${id}`;
+        if (1) {
+            const pass = pipeline.addRenderPass(width, height, "swizzle");
+            pass.addRenderTarget(renderTarget, gfx.LoadOp.DISCARD, gfx.StoreOp.STORE)
+            pass.addTexture("storage", "mainTexture");
+            pass.addQueue(rendering.QueueHint.OPAQUE, "swizzle-phase")
+                .addFullscreenQuad(materialMap.get("swizzleQuad"), 0);
+        } else {
+            pipeline.addCopyPass([new CopyPair("storage", renderTarget, 1, 1, 0, 0, 0, 0, 0, 0)]);
+        }
     }
     // internal cached resources
     // 管线内部缓存资源
