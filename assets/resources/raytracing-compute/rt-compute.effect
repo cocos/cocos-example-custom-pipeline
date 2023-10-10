@@ -24,10 +24,10 @@ CCProgram rt-comp %{
   float hit_sphere(vec3 center, float radius, Ray r) {
     vec3 oc = r.origin - center;
     float a = dot(r.direction, r.direction);
-    float b = 2.0*dot(oc, r.direction);
+    float half_b = dot(oc, r.direction);
     float c = dot(oc, oc) - radius*radius;
-    float discriminant = b*b - 4.0*a*c;
-    return discriminant < 0.F ? -1.F : -b - sqrt(discriminant);
+    float discriminant = half_b*half_b - a*c;
+    return discriminant < 0.F ? -1.F : -half_b - sqrt(discriminant);
   }
 
   vec4 ray_color(Ray r) {
