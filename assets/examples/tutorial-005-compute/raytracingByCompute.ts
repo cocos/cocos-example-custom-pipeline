@@ -1,9 +1,6 @@
 import {
     _decorator,
-    CameraComponent,
-    cclegacy,
     Component,
-    geometry,
     gfx,
     Material,
     renderer,
@@ -134,34 +131,20 @@ class RaytracingByComputePipeline implements rendering.PipelineBuilder {
         const pipeline = ppl as rendering.Pipeline;
         addOrUpdateStorageTexture("storage", gfx.Format.RGBA8, width, height, rendering.ResourceResidency.MANAGED, pipeline);
 
+        // compute
         const computePass = pipeline.addComputePass("rt1w");
         computePass.addStorageImage("storage", rendering.AccessType.WRITE, "co");
         computePass.addQueue().addDispatch(width / 8, height / 4, 1, materialMap.get("rt1w"));
 
+        // sample storage texture to swapchain
         const renderTarget = `Color${id}`;
-        if (1) {
-            const pass = pipeline.addRenderPass(width, height, "swizzle");
-            pass.addRenderTarget(renderTarget, gfx.LoadOp.DISCARD, gfx.StoreOp.STORE)
-            pass.addTexture("storage", "mainTexture");
-            pass.addQueue(rendering.QueueHint.OPAQUE, "swizzle-phase")
-                .addFullscreenQuad(materialMap.get("swizzleQuad"), 0);
-        } else {
-            pipeline.addCopyPass([new CopyPair("storage", renderTarget, 1, 1, 0, 0, 0, 0, 0, 0)]);
-        }
+        const pass = pipeline.addRenderPass(width, height, "swizzle");
+        pass.addRenderTarget(renderTarget, gfx.LoadOp.DISCARD, gfx.StoreOp.STORE)
+        pass.addTexture("storage", "mainTexture");
+        pass.addQueue(rendering.QueueHint.OPAQUE, "swizzle-phase")
+            .addFullscreenQuad(materialMap.get("swizzleQuad"), 0);
+
     }
-    // internal cached resources
-    // 管线内部缓存资源
-    // pipeline
-    readonly _clearColor = new gfx.Color(0, 0, 0, 1);
-    readonly _viewport = new gfx.Viewport();
-    readonly _flipY = cclegacy.director.root.device.capabilities.screenSpaceSignY;
-    // scene
-    readonly _sphere = geometry.Sphere.create(0, 0, 0, 1);
-    readonly _boundingBox = new geometry.AABB();
-    readonly _rangedDirLightBoundingBox = new geometry.AABB(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
-    // valid lights
-    readonly lights: renderer.scene.Light[] = [];
-    readonly spotLights: renderer.scene.SpotLight[] = [];
 }
 
 // register pipeline
