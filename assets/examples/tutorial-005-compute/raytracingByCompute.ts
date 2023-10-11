@@ -6,11 +6,13 @@ import {
     renderer,
     rendering,
     resources,
+    Vec4,
 } from 'cc';
 import { getWindowInfo, WindowInfo } from '../pipeline-data';
 const { ccclass, property } = _decorator;
 
 import CopyPair = rendering.CopyPair;
+import { JSB } from 'cc/env';
 
 
 
@@ -27,6 +29,22 @@ function addOrUpdateStorageTexture(name: string, format: gfx.Format, width: numb
         pipeline.addStorageTexture(name, format, width, height, residency);
     } else {
         pipeline.updateStorageTexture(name, width, height, format);
+    }
+}
+
+function addOrUpdateStorageBuffer(name: string, format: gfx.Format, size: number, residency: rendering.ResourceResidency, pipeline: rendering.Pipeline) {
+    if (!pipeline.containsResource(name)) {
+        pipeline.addStorageBuffer(name, format, size, residency);
+    } else {
+        pipeline.updateStorageBuffer(name, size);
+    }
+}
+
+function addOrUpdateUniformBuffer(name: string, flags: rendering.ResourceFlags, size: number, residency: rendering.ResourceResidency, pipeline: rendering.Pipeline) {
+    if (!pipeline.containsResource(name)) {
+        pipeline.addBuffer(name, size, flags, residency);
+    } else {
+        pipeline.updateBuffer(name, size);
     }
 }
 
@@ -128,12 +146,30 @@ class RaytracingByComputePipeline implements rendering.PipelineBuilder {
         width: number,
         height: number): void {
 
+
         const pipeline = ppl as rendering.Pipeline;
         addOrUpdateStorageTexture("storage", gfx.Format.RGBA8, width, height, rendering.ResourceResidency.MANAGED, pipeline);
+        addOrUpdateUniformBuffer("spheres", 2 * 4 * 4, rendering.ResourceFlags.UNIFORM, rendering.ResourceResidency.MANAGED, pipeline);
+
+        const spheres: Float32Array = new Float32Array([
+            0, 0, -1, 0.5,
+            0, -100.5, -1, 100,
+        ]);
+
+        if (!this._buffer) {
+            this._buffer = gfx.deviceManager.gfxDevice.createBuffer(new gfx.BufferInfo(
+                gfx.BufferUsageBit.UNIFORM,
+                gfx.MemoryUsageBit.DEVICE,
+                2 * 4 * 4,
+                4 * 4)
+            );
+            this._buffer.update(spheres.buffer);
+        }
 
         // compute
         const computePass = pipeline.addComputePass("rt1w");
         computePass.addStorageImage("storage", rendering.AccessType.WRITE, "co");
+        computePass.setBuffer("b_sphereBuffer", this._buffer);
         computePass.addQueue().addDispatch(width / 8, height / 4, 1, materialMap.get("rt1w"));
 
         // sample storage texture to swapchain
@@ -145,6 +181,8 @@ class RaytracingByComputePipeline implements rendering.PipelineBuilder {
             .addFullscreenQuad(materialMap.get("swizzleQuad"), 0);
 
     }
+
+    private _buffer: gfx.Buffer | null = null;
 }
 
 // register pipeline
