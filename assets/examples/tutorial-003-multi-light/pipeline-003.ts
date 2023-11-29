@@ -30,7 +30,12 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
 
             // build forward lighting for editor or game view
             // 为编辑器以及游戏视图构建前向光照管线
-            this.buildForward(ppl, camera, info.id, info.width, info.height);
+            if (camera.cameraUsage >= renderer.scene.CameraUsage.GAME ||
+                camera.cameraUsage === renderer.scene.CameraUsage.SCENE_VIEW) {
+                this.buildForward(ppl, camera, info.id, info.width, info.height);
+            } else {
+                this.buildEditor(ppl, camera, info.id, info.width, info.height);
+            }
         }
     }
     // internal methods
@@ -38,14 +43,16 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
     private prepareCameraResources(
         ppl: rendering.BasicPipeline,
         camera: renderer.scene.Camera): WindowInfo {
+        const width = Math.floor(camera.window.width);
+        const height = Math.floor(camera.window.height);
         // get window info
         // 获取窗口信息
         const info = getWindowInfo(camera);
         // check if camera resources are initialized
         // 检查摄像机资源是否已经初始化
         if (info.width === 0 && info.height === 0) {
-            info.width = camera.window.width;
-            info.height = camera.window.height;
+            info.width = width;
+            info.height = height;
             this.initCameraResources(ppl, camera, info.id, info.width, info.height);
         } else if (
             // we need to check framebuffer because window may be reused
@@ -53,13 +60,13 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
             info.framebuffer !== camera.window.framebuffer ||
             // we need to check width and height because window may be resized
             // 我们需要检查宽度和高度，因为窗口可能被调整大小
-            info.width !== camera.window.width ||
-            info.height !== camera.window.height) {
+            info.width !== width ||
+            info.height !== height) {
             // resized or invalidated
             // 调整大小或者失效
             info.framebuffer = camera.window.framebuffer; // update framebuffer
-            info.width = camera.window.width; // update width
-            info.height = camera.window.height; // update height
+            info.width = width; // update width
+            info.height = height; // update height
             // update resources
             // 更新资源
             this.updateCameraResources(ppl, camera, info.id, info.width, info.height);
@@ -95,7 +102,68 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
         ppl.updateRenderTarget(`ShadowMap${id}`, shadowSize.x, shadowSize.y);
         ppl.updateDepthStencil(`ShadowDepth${id}`, shadowSize.x, shadowSize.y);
     }
+    private buildEditor(ppl: rendering.BasicPipeline,
+        camera: renderer.scene.Camera,
+        id: number, // window id
+        width: number,
+        height: number): void {
+        const scene = camera.scene;
+        const mainLight = scene.mainLight;
+        // prepare camera clear color
+        // 准备摄像机清除颜色
+        this._clearColor.x = camera.clearColor.x;
+        this._clearColor.y = camera.clearColor.y;
+        this._clearColor.z = camera.clearColor.z;
+        this._clearColor.w = camera.clearColor.w;
 
+        // prepare camera viewport
+        // 准备摄像机视口
+        this._viewport.left = camera.viewport.x * width;
+        this._viewport.top = camera.viewport.y * height;
+        this._viewport.width = camera.viewport.z * width;
+        this._viewport.height = camera.viewport.w * height;
+
+        // Forward Lighting
+        // 前向光照
+        const pass = ppl.addRenderPass(width, height, 'default');
+        // set viewport
+        // 设置视口
+        pass.setViewport(this._viewport);
+        // bind output render target
+        // 绑定输出渲染目标
+        if (needClearColor(camera)) {
+            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.CLEAR, gfx.StoreOp.STORE, this._clearColor);
+        } else {
+            pass.addRenderTarget(`Color${id}`, gfx.LoadOp.LOAD);
+        }
+        // bind depth stencil buffer
+        // 绑定深度模板缓冲区
+        if (camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL) {
+            pass.addDepthStencil(
+                `DepthStencil${id}`,
+                gfx.LoadOp.CLEAR,
+                gfx.StoreOp.STORE,
+                camera.clearDepth,
+                camera.clearStencil,
+                camera.clearFlag & gfx.ClearFlagBit.DEPTH_STENCIL);
+        } else {
+            pass.addDepthStencil(`DepthStencil${id}`, gfx.LoadOp.LOAD);
+        }
+        // add opaque and mask queue
+        // 添加不透明和遮罩队列
+        pass.addQueue(rendering.QueueHint.NONE)
+            .addScene(
+                camera,
+                rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK,
+                mainLight);
+        // add transparent queue
+        // 添加透明队列
+        pass.addQueue(rendering.QueueHint.BLEND)
+            .addScene(
+                camera,
+                rendering.SceneFlags.BLEND,
+                mainLight);
+    }
     // build forward lighting pipeline
     // NOTE: this is just a simple example, you can implement your own pipeline here
     // In this example, we have turned off shadowmap in the scene
@@ -108,7 +176,6 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
         id: number, // window id
         width: number,
         height: number): void {
-
         const scene = camera.scene;
         const mainLight = scene.mainLight;
 
@@ -170,10 +237,10 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
             // add opaque and mask queue
             // 添加不透明和遮罩队列
             pass.addQueue(rendering.QueueHint.NONE)
-                .addSceneOfCamera(
+                .addScene(
                     camera,
-                    new rendering.LightInfo(),
-                    rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK);
+                    rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK,
+                    mainLight);
 
             // add multi-lights
             // 添加多光源
@@ -182,10 +249,10 @@ class MultiLightPipeline implements rendering.PipelineBuilder {
             // add transparent queue
             // 添加透明队列
             pass2.addQueue(rendering.QueueHint.BLEND)
-                .addSceneOfCamera(
+                .addScene(
                     camera,
-                    new rendering.LightInfo(),
-                    rendering.SceneFlags.BLEND | rendering.SceneFlags.UI);
+                    rendering.SceneFlags.BLEND | rendering.SceneFlags.UI,
+                    mainLight);
         }
     }
     // internal cached resources
