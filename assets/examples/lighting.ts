@@ -17,7 +17,6 @@ export class Lighting {
             }
             geometry.Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
             if (geometry.intersect.sphereFrustum(this._sphere, frustum)) {
-                this.lights.push(light);
                 if (light.shadowEnabled) {
                     this.shadowEnabledSpotLights.push(light);
                 } else {
