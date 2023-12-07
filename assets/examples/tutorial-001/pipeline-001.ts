@@ -59,7 +59,7 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
             info.height = camera.window.height; // update height
             // update resources
             // 更新资源
-            this.updateCameraResources(ppl, camera, info.id, info.width, info.height);
+            this.initCameraResources(ppl, camera, info.id, info.width, info.height);
         }
         // return window info
         // 返回窗口信息
@@ -70,12 +70,6 @@ class HelloWorldPipeline implements rendering.PipelineBuilder {
         // 所有资源可以在这里初始化
         ppl.addRenderWindow(`Color${id}`, gfx.Format.BGRA8, width, height, camera.window);
         ppl.addDepthStencil(`DepthStencil${id}`, gfx.Format.DEPTH_STENCIL, width, height);
-    }
-    private updateCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
-        // all resource can be updated here
-        // 所有资源可以在这里更新
-        ppl.updateRenderWindow(`Color${id}`, camera.window);
-        ppl.updateDepthStencil(`DepthStencil${id}`, width, height);
     }
 
     // build forward lighting pipeline
