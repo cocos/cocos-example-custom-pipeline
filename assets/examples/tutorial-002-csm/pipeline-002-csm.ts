@@ -61,7 +61,7 @@ class CsmPipeline implements rendering.PipelineBuilder {
             info.height = camera.window.height; // update height
             // update resources
             // 更新资源
-            this.updateCameraResources(ppl, camera, info.id, info.width, info.height);
+            this.initCameraResources(ppl, camera, info.id, info.width, info.height);
         }
         // return window info
         // 返回窗口信息
@@ -83,16 +83,6 @@ class CsmPipeline implements rendering.PipelineBuilder {
         const shadowSize = ppl.pipelineSceneData.shadows.size;
         ppl.addRenderTarget(`ShadowMap${id}`, shadowFormat, shadowSize.x, shadowSize.y);
         ppl.addDepthStencil(`ShadowDepth${id}`, gfx.Format.DEPTH_STENCIL, shadowSize.x, shadowSize.y);
-    }
-    private updateCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
-        // all resource can be updated here
-        // 所有资源可以在这里更新
-        ppl.updateRenderWindow(`Color${id}`, camera.window);
-        ppl.updateDepthStencil(`DepthStencil${id}`, width, height);
-        // CSM
-        const shadowSize = ppl.pipelineSceneData.shadows.size;
-        ppl.updateRenderTarget(`ShadowMap${id}`, shadowSize.x, shadowSize.y);
-        ppl.updateDepthStencil(`ShadowDepth${id}`, shadowSize.x, shadowSize.y);
     }
     // build forward lighting pipeline
     // NOTE: this is just a simple example, you can implement your own pipeline here

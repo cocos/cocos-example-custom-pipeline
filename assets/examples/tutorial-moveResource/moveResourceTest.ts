@@ -84,13 +84,12 @@ class MoveResourcePipeline implements rendering.PipelineBuilder {
             info.height = camera.window.height; // update height
             // update resources
             // 更新资源
-            this.updateCameraResources(ppl, camera, info.id, info.width, info.height);
+            this.initCameraResources(ppl, camera, info.id, info.width, info.height);
         }
         // return window info
         // 返回窗口信息
         return info;
     }
-
 
     private initCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
         // all resource can be initialized here
@@ -98,34 +97,26 @@ class MoveResourcePipeline implements rendering.PipelineBuilder {
         ppl.addRenderWindow(`Color${id}`, gfx.Format.BGRA8, width, height, camera.window);
         ppl.addDepthStencil(`DepthStencil${id}`, gfx.Format.DEPTH_STENCIL, width, height);
 
-        if (!ppl.containsResource('ctop')) {
-            ppl.addRenderTarget('ctop', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
-            ppl.addRenderTarget('cbottom', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
-            ppl.addRenderTarget('cleft', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
-            ppl.addRenderTarget('cright', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
-            ppl.addRenderTarget('cfront', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
-            ppl.addRenderTarget('crear', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
+        ppl.addRenderTarget('ctop', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
+        ppl.addRenderTarget('cbottom', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
+        ppl.addRenderTarget('cleft', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
+        ppl.addRenderTarget('cright', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
+        ppl.addRenderTarget('cfront', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
+        ppl.addRenderTarget('crear', gfx.Format.RGBA8, width, height, ResourceResidency.MANAGED);
 
-            ppl.addResource('texArray6', ResourceDimension.TEXTURE2D, gfx.Format.RGBA8, width, height,
-                1, 6, 1, 1,
-                ResourceFlags.COLOR_ATTACHMENT | ResourceFlags.SAMPLED | ResourceFlags.INPUT_ATTACHMENT,
-                ResourceResidency.MANAGED);
-            ppl.addResource('texArray3_0', ResourceDimension.TEXTURE2D, gfx.Format.RGBA8, width, height,
-                1, 3, 1, 1,
-                ResourceFlags.COLOR_ATTACHMENT | ResourceFlags.SAMPLED | ResourceFlags.INPUT_ATTACHMENT,
-                ResourceResidency.MANAGED);
+        ppl.addResource('texArray6', ResourceDimension.TEXTURE2D, gfx.Format.RGBA8, width, height,
+            1, 6, 1, 1,
+            ResourceFlags.COLOR_ATTACHMENT | ResourceFlags.SAMPLED | ResourceFlags.INPUT_ATTACHMENT,
+            ResourceResidency.MANAGED);
+        ppl.addResource('texArray3_0', ResourceDimension.TEXTURE2D, gfx.Format.RGBA8, width, height,
+            1, 3, 1, 1,
+            ResourceFlags.COLOR_ATTACHMENT | ResourceFlags.SAMPLED | ResourceFlags.INPUT_ATTACHMENT,
+            ResourceResidency.MANAGED);
 
-            ppl.addResource('texArray3_1', ResourceDimension.TEXTURE2D, gfx.Format.RGBA8, width, height,
-                1, 3, 1, 1,
-                ResourceFlags.COLOR_ATTACHMENT | ResourceFlags.SAMPLED | ResourceFlags.INPUT_ATTACHMENT,
-                ResourceResidency.MANAGED);
-        }
-    }
-    private updateCameraResources (ppl: rendering.BasicPipeline, camera: renderer.scene.Camera, id: number, width: number, height: number): void {
-        // all resource can be updated here
-        // 所有资源可以在这里更新
-        ppl.updateRenderWindow(`Color${id}`, camera.window);
-        ppl.updateDepthStencil(`DepthStencil${id}`, width, height);
+        ppl.addResource('texArray3_1', ResourceDimension.TEXTURE2D, gfx.Format.RGBA8, width, height,
+            1, 3, 1, 1,
+            ResourceFlags.COLOR_ATTACHMENT | ResourceFlags.SAMPLED | ResourceFlags.INPUT_ATTACHMENT,
+            ResourceResidency.MANAGED);
     }
 
     private addForwardPass (ppl: rendering.BasicPipeline, cam: renderer.scene.Camera, width: number, height: number, targetName: string, dsName: string, clearColor: gfx.Color) {
