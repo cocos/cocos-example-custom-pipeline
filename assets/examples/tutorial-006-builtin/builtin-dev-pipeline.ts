@@ -140,28 +140,33 @@ function setupPipelineConfigs(
 const defaultSettings = makePipelineSettings();
 
 class CameraConfigs {
+    settings: PipelineSettings = defaultSettings;
+    // Window
     isMainGameWindow = false;
+    // Camera
     colorName = '';
     depthStencilName = '';
+    // Pipeline
+    enableFullPipeline = false;
+    enableProfiler = false;
+    enablePostProcess = false;
+    // Forward
     enableMainLightShadowMap = false;
     enableMainLightPlanarShadowMap = false;
-    enablePostProcess = false;
-    enableProfiler = false;
+    enableSceneDepth = false;
     enableShadingScale = false;
     enableMSAA = false;
+    enableHDR = false;
+    enablePlanarReflectionProbe = false;
+    enableSingleForwardPass = false;
+    radianceFormat = gfx.Format.RGBA8;
+    shadingScale = 0.5;
+    // PostProcess
     enableDOF = false;
     enableBloom = false;
     enableColorGrading = false;
     enableFXAA = false;
     enableFSR = false;
-    enableHDR = false;
-    enablePlanarReflectionProbe = false;
-    outputRadianceDepth = false;
-    useFullPipeline = false;
-    singleForwardRadiancePass = false;
-    radianceFormat = gfx.Format.RGBA8;
-    shadingScale = 0.5;
-    settings: PipelineSettings = defaultSettings;
 }
 
 function setupPostProcessConfigs(
@@ -216,7 +221,7 @@ function setupCameraConfigs(
     cameraConfigs.colorName = window.colorName;
     cameraConfigs.depthStencilName = window.depthStencilName;
 
-    cameraConfigs.useFullPipeline = (camera.visibility & (Layers.Enum.DEFAULT)) !== 0;
+    cameraConfigs.enableFullPipeline = (camera.visibility & (Layers.Enum.DEFAULT)) !== 0;
     cameraConfigs.enableProfiler = DEBUG && isMainGameWindow;
 
     const isEditorView: boolean
@@ -481,11 +486,11 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
             cameraConfigs.isMainGameWindow || camera.cameraUsage === CameraUsage.SCENE_VIEW;
 
         // Forward rendering (Depend on MSAA and TBR)
-        cameraConfigs.singleForwardRadiancePass
+        cameraConfigs.enableSingleForwardPass
             = pipelineConfigs.isMobile || cameraConfigs.enableMSAA;
 
         // HDR
-        cameraConfigs.enableHDR = cameraConfigs.useFullPipeline
+        cameraConfigs.enableHDR = cameraConfigs.enableFullPipeline
             && pipelineConfigs.useFloatOutput;
         cameraConfigs.radianceFormat = cameraConfigs.enableHDR
             ? gfx.Format.RGBA16F : gfx.Format.RGBA8;
@@ -502,9 +507,9 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
 
         if (cameraConfigs.enableDOF) {
             cameraConfigs.enableMSAA = false;
-            cameraConfigs.outputRadianceDepth = true;
+            cameraConfigs.enableSceneDepth = true;
         } else {
-            cameraConfigs.outputRadianceDepth = false;
+            cameraConfigs.enableSceneDepth = false;
         }
     }
     windowResize(
@@ -568,7 +573,7 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
         );
 
         // Spot-light shadow maps
-        if (cameraConfigs.singleForwardRadiancePass) {
+        if (cameraConfigs.enableSingleForwardPass) {
             const count = pplConfigs.mobileMaxSpotLightShadowMaps;
             for (let i = 0; i !== count; ++i) {
                 ppl.addRenderTarget(
@@ -617,7 +622,7 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
         }
 
         // Spot light shadow maps (Mobile or MSAA)
-        if (cameraConfigs.singleForwardRadiancePass) {
+        if (cameraConfigs.enableSingleForwardPass) {
             // Currently, only support 1 spot light with shadow map on mobile platform.
             // TODO(zhouzhenglong): Relex this limitation.
             this.forwardLighting.addSpotlightShadowPasses(
@@ -643,7 +648,11 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
             context.width, context.height, mainLight,
             context.colorName, context.depthStencilName,
             !cameraConfigs.enableMSAA,
-            cameraConfigs.outputRadianceDepth ? StoreOp.STORE : StoreOp.DISCARD);
+            cameraConfigs.enableSceneDepth ? StoreOp.STORE : StoreOp.DISCARD);
+
+        if (!cameraConfigs.enableSceneDepth) {
+            context.depthStencilName = '';
+        }
 
         return pass;
     }
@@ -849,12 +858,12 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
 
         // MSAA
         const enableMSAA = !disableMSAA && cameraConfigs.enableMSAA;
-        assert(!enableMSAA || cameraConfigs.singleForwardRadiancePass);
+        assert(!enableMSAA || cameraConfigs.enableSingleForwardPass);
 
         // ----------------------------------------------------------------
         // Forward Lighting (Main Directional Light)
         // ----------------------------------------------------------------
-        const pass = cameraConfigs.singleForwardRadiancePass
+        const pass = cameraConfigs.enableSingleForwardPass
             ? this._addForwardSingleRadiancePass(ppl, pplConfigs, cameraConfigs,
                 id, camera, enableMSAA, width, height, mainLight,
                 colorName, depthStencilName, depthStencilStoreOp)
@@ -897,7 +906,7 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
         depthStencilName: string,
         depthStencilStoreOp: gfx.StoreOp
     ): rendering.BasicRenderPassBuilder {
-        assert(cameraConfigs.singleForwardRadiancePass);
+        assert(cameraConfigs.enableSingleForwardPass);
         // ----------------------------------------------------------------
         // Forward Lighting (Main Directional Light)
         // ----------------------------------------------------------------
@@ -947,7 +956,7 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
         depthStencilName: string,
         depthStencilStoreOp: gfx.StoreOp
     ): rendering.BasicRenderPassBuilder {
-        assert(!cameraConfigs.singleForwardRadiancePass);
+        assert(!cameraConfigs.enableSingleForwardPass);
 
         // Forward Lighting (Main Directional Light)
         let pass = ppl.addRenderPass(width, height, 'default');
@@ -1174,13 +1183,13 @@ if (rendering) {
                 assert(passBuilders !== undefined);
 
                 setupCameraConfigs(camera, this._configs, this._cameraConfigs, passBuilders);
-                // log(`Setup camera: ${camera.node!.name}, window: ${camera.window.renderWindowId}, isFull: ${this._cameraConfigs.useFullPipeline}, `
+                // log(`Setup camera: ${camera.node!.name}, window: ${camera.window.renderWindowId}, isFull: ${this._cameraConfigs.enableFullPipeline}, `
                 //     + `size: ${camera.window.width}x${camera.window.height}`);
 
                 this._pipelineEvent.emit(PipelineEventType.RENDER_CAMERA_BEGIN, camera);
 
                 // Build pipeline
-                if (this._cameraConfigs.useFullPipeline) {
+                if (this._cameraConfigs.enableFullPipeline) {
                     this._buildForwardPipeline(ppl, camera, camera.scene, passBuilders);
                 } else {
                     this._buildSimplePipeline(ppl, camera);
@@ -1536,7 +1545,7 @@ if (rendering) {
             cocPass.setVec4('g_platform', this._configs.platform);
             cocPass.setMat4('proj', camera.matProj);
             cocPass.setMat4('invProj', camera.matProjInv);
-            cocPass.setMat4('viewMatInv', camera.matViewInv);
+            cocPass.setMat4('viewMatInv', camera.node.worldMatrix);
             cocPass.setVec4('cocParams', this._cocParams);
             cocPass.setVec4('focus', this._focusPos);
             cocPass
