@@ -205,12 +205,10 @@ function setupCameraConfigs(
     camera: renderer.scene.Camera,
     pipelineConfigs: PipelineConfigs,
     cameraConfigs: CameraConfigs,
-    forwardPass: BuiltinForwardPassBuilder,
-    passBuilders?: rendering.PipelinePassBuilder[],
+    passBuilders: rendering.PipelinePassBuilder[],
 ): void {
-    if (passBuilders) {
-        sortPipelinePassBuildersByConfigOrder(passBuilders);
-    }
+    sortPipelinePassBuildersByConfigOrder(passBuilders);
+
     const window = camera.window;
     const isMainGameWindow: boolean = camera.cameraUsage === CameraUsage.GAME && !!window.swapchain;
 
@@ -242,27 +240,10 @@ function setupCameraConfigs(
 
     setupPostProcessConfigs(pipelineConfigs, cameraConfigs.settings, cameraConfigs);
 
-    if (passBuilders) {
-        let i = 0;
-        for (; i !== passBuilders.length; ++i) {
-            const builder = passBuilders[i];
-            if (builder.getConfigOrder() < BuiltinForwardPassBuilder.ConfigOrder) {
-                if (builder.configCamera) {
-                    builder.configCamera(camera, pipelineConfigs, cameraConfigs);
-                }
-                continue;
-            }
-            break;
+    for (const builder of passBuilders) {
+        if (builder.configCamera) {
+            builder.configCamera(camera, pipelineConfigs, cameraConfigs);
         }
-        forwardPass.configCamera(camera, pipelineConfigs, cameraConfigs);
-        for (; i !== passBuilders.length; ++i) {
-            const builder = passBuilders[i];
-            if (builder.configCamera) {
-                builder.configCamera(camera, pipelineConfigs, cameraConfigs);
-            }
-        }
-    } else {
-        forwardPass.configCamera(camera, pipelineConfigs, cameraConfigs);
     }
 
     // FSR (Depend on Shading scale)
@@ -1110,6 +1091,18 @@ if (rendering) {
         // ----------------------------------------------------------------
         // Interface
         // ----------------------------------------------------------------
+        private _prepareBuiltinForwardPass(camera: renderer.scene.Camera): rendering.PipelinePassBuilder[] {
+            let passBuilders = this._pipelinePasses.get(camera);
+            if (!passBuilders) {
+                passBuilders = [this._forwardPass];
+                this._pipelinePasses.set(camera, passBuilders);
+                return passBuilders;
+            }
+            if (passBuilders.findIndex((builder) => builder === this._forwardPass) === -1) {
+                passBuilders.push(this._forwardPass);
+            }
+            return passBuilders;
+        }
         windowResize(
             ppl: rendering.BasicPipeline,
             window: renderer.RenderWindow,
@@ -1119,35 +1112,13 @@ if (rendering) {
         ): void {
             setupPipelineConfigs(ppl, this._configs);
 
-            const passBuilders = this._pipelinePasses.get(camera);
-            setupCameraConfigs(camera, this._configs, this._cameraConfigs, this._forwardPass, passBuilders);
+            const passBuilders = this._prepareBuiltinForwardPass(camera);
+            setupCameraConfigs(camera, this._configs, this._cameraConfigs, passBuilders);
 
-            if (passBuilders) {
-                let i = 0;
-                for (; i !== passBuilders.length; ++i) {
-                    const passBuilder = passBuilders[i];
-                    if (passBuilder.getConfigOrder() < BuiltinForwardPassBuilder.ConfigOrder) {
-                        if (passBuilder.windowResize) {
-                            passBuilder.windowResize(ppl, this._configs, this._cameraConfigs,
-                                window, camera, nativeWidth, nativeHeight);
-                        }
-                        continue;
-                    }
-                    break;
+            for (const builder of passBuilders) {
+                if (builder.windowResize) {
+                    builder.windowResize(ppl, this._configs, this._cameraConfigs, window, camera, nativeWidth, nativeHeight);
                 }
-                this._forwardPass.windowResize(ppl, this._configs, this._cameraConfigs,
-                    window, camera, nativeWidth, nativeHeight);
-
-                for (; i !== passBuilders.length; ++i) {
-                    const passBuilder = passBuilders[i];
-                    if (passBuilder.windowResize) {
-                        passBuilder.windowResize(ppl, this._configs, this._cameraConfigs,
-                            window, camera, nativeWidth, nativeHeight);
-                    }
-                }
-            } else {
-                this._forwardPass.windowResize(ppl, this._configs, this._cameraConfigs,
-                    window, camera, nativeWidth, nativeHeight);
             }
 
             const settings = this._cameraConfigs.settings;
@@ -1215,8 +1186,10 @@ if (rendering) {
                     continue;
                 }
                 // Setup camera configs
-                setupCameraConfigs(camera, this._configs, this._cameraConfigs,
-                    this._forwardPass, this._pipelinePasses.get(camera));
+                const passBuilders = this._pipelinePasses.get(camera);
+                assert(passBuilders !== undefined);
+
+                setupCameraConfigs(camera, this._configs, this._cameraConfigs, passBuilders);
                 // log(`Setup camera: ${camera.node!.name}, window: ${camera.window.renderWindowId}, isFull: ${this._cameraConfigs.useFullPipeline}, `
                 //     + `size: ${camera.window.width}x${camera.window.height}`);
 
