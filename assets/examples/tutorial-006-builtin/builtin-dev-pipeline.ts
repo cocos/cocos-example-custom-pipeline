@@ -271,197 +271,197 @@ interface PipelineContext {
     ldrColorName: string;
 }
 
+class ForwardLighting {
+    // Active lights
+    private readonly lights: renderer.scene.Light[] = [];
+    // Active spot lights with shadows (Mutually exclusive with `lights`)
+    private readonly shadowEnabledSpotLights: renderer.scene.SpotLight[] = [];
+
+    // Internal cached resources
+    private readonly _sphere = Sphere.create(0, 0, 0, 1);
+    private readonly _boundingBox = new AABB();
+    private readonly _rangedDirLightBoundingBox = new AABB(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
+
+    // ----------------------------------------------------------------
+    // Interface
+    // ----------------------------------------------------------------
+    public cullLights(scene: renderer.RenderScene, frustum: geometry.Frustum, cameraPos?: Vec3): void {
+        // TODO(zhouzhenglong): Make light culling native
+        this.lights.length = 0;
+        this.shadowEnabledSpotLights.length = 0;
+        // spot lights
+        for (const light of scene.spotLights) {
+            if (light.baked) {
+                continue;
+            }
+            Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
+            if (intersect.sphereFrustum(this._sphere, frustum)) {
+                if (light.shadowEnabled) {
+                    this.shadowEnabledSpotLights.push(light);
+                } else {
+                    this.lights.push(light);
+                }
+            }
+        }
+        // sphere lights
+        for (const light of scene.sphereLights) {
+            if (light.baked) {
+                continue;
+            }
+            Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
+            if (intersect.sphereFrustum(this._sphere, frustum)) {
+                this.lights.push(light);
+            }
+        }
+        // point lights
+        for (const light of scene.pointLights) {
+            if (light.baked) {
+                continue;
+            }
+            Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
+            if (intersect.sphereFrustum(this._sphere, frustum)) {
+                this.lights.push(light);
+            }
+        }
+        // ranged dir lights
+        for (const light of scene.rangedDirLights) {
+            AABB.transform(this._boundingBox, this._rangedDirLightBoundingBox, light.node!.getWorldMatrix());
+            if (intersect.aabbFrustum(this._boundingBox, frustum)) {
+                this.lights.push(light);
+            }
+        }
+
+        if (cameraPos) {
+            this.shadowEnabledSpotLights.sort(
+                (lhs, rhs) => Vec3.squaredDistance(cameraPos, lhs.position) - Vec3.squaredDistance(cameraPos, rhs.position),
+            );
+        }
+    }
+    private _addLightQueues(camera: renderer.scene.Camera, pass: rendering.BasicRenderPassBuilder): void {
+        for (const light of this.lights) {
+            const queue = pass.addQueue(rendering.QueueHint.BLEND, 'forward-add');
+            switch (light.type) {
+                case LightType.SPHERE:
+                    queue.name = 'sphere-light';
+                    break;
+                case LightType.SPOT:
+                    queue.name = 'spot-light';
+                    break;
+                case LightType.POINT:
+                    queue.name = 'point-light';
+                    break;
+                case LightType.RANGED_DIRECTIONAL:
+                    queue.name = 'ranged-directional-light';
+                    break;
+                default:
+                    queue.name = 'unknown-light';
+            }
+            queue.addScene(
+                camera,
+                rendering.SceneFlags.BLEND,
+                light,
+            );
+        }
+    }
+    public addSpotlightShadowPasses(
+        ppl: rendering.BasicPipeline,
+        camera: renderer.scene.Camera,
+        maxNumShadowMaps: number,
+    ): void {
+        let i = 0;
+        for (const light of this.shadowEnabledSpotLights) {
+            const shadowMapSize = ppl.pipelineSceneData.shadows.size;
+            const shadowPass = ppl.addRenderPass(shadowMapSize.x, shadowMapSize.y, 'default');
+            shadowPass.name = `SpotLightShadowPass${i}`;
+            shadowPass.addRenderTarget(`SpotShadowMap${i}`, LoadOp.CLEAR, StoreOp.STORE, new Color(1, 1, 1, 1));
+            shadowPass.addDepthStencil(`SpotShadowDepth${i}`, LoadOp.CLEAR, StoreOp.DISCARD);
+            shadowPass.addQueue(rendering.QueueHint.NONE, 'shadow-caster')
+                .addScene(camera, rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER)
+                .useLightFrustum(light);
+            ++i;
+            if (i >= maxNumShadowMaps) {
+                break;
+            }
+        }
+    }
+    public addLightQueues(pass: rendering.BasicRenderPassBuilder,
+        camera: renderer.scene.Camera, maxNumShadowMaps: number): void {
+        this._addLightQueues(camera, pass);
+        let i = 0;
+        for (const light of this.shadowEnabledSpotLights) {
+            // Add spot-light pass
+            // Save last RenderPass to the `pass` variable
+            // TODO(zhouzhenglong): Fix per queue addTexture
+            pass.addTexture(`SpotShadowMap${i}`, 'cc_spotShadowMap');
+            const queue = pass.addQueue(rendering.QueueHint.BLEND, 'forward-add');
+            queue.addScene(camera, rendering.SceneFlags.BLEND, light);
+            ++i;
+            if (i >= maxNumShadowMaps) {
+                break;
+            }
+        }
+    }
+
+    // Notice: ForwardLighting cannot handle a lot of lights.
+    // If there are too many lights, the performance will be very poor.
+    // If many lights are needed, please implement a forward+ or deferred rendering pipeline.
+    public addLightPasses(
+        colorName: string,
+        depthStencilName: string,
+        depthStencilStoreOp: gfx.StoreOp,
+        id: number, // window id
+        width: number,
+        height: number,
+        camera: renderer.scene.Camera,
+        viewport: gfx.Viewport,
+        ppl: rendering.BasicPipeline,
+        pass: rendering.BasicRenderPassBuilder,
+    ): rendering.BasicRenderPassBuilder {
+        this._addLightQueues(camera, pass);
+
+        let count = 0;
+        const shadowMapSize = ppl.pipelineSceneData.shadows.size;
+        for (const light of this.shadowEnabledSpotLights) {
+            const shadowPass = ppl.addRenderPass(shadowMapSize.x, shadowMapSize.y, 'default');
+            shadowPass.name = 'SpotlightShadowPass';
+            // Reuse csm shadow map
+            shadowPass.addRenderTarget(`ShadowMap${id}`, LoadOp.CLEAR, StoreOp.STORE, new Color(1, 1, 1, 1));
+            shadowPass.addDepthStencil(`ShadowDepth${id}`, LoadOp.CLEAR, StoreOp.DISCARD);
+            shadowPass.addQueue(rendering.QueueHint.NONE, 'shadow-caster')
+                .addScene(camera, rendering.SceneFlags.OPAQUE | rendering.SceneFlags.MASK | rendering.SceneFlags.SHADOW_CASTER)
+                .useLightFrustum(light);
+
+            // Add spot-light pass
+            // Save last RenderPass to the `pass` variable
+            ++count;
+            const storeOp = count === this.shadowEnabledSpotLights.length
+                ? depthStencilStoreOp
+                : StoreOp.STORE;
+
+            pass = ppl.addRenderPass(width, height, 'default');
+            pass.name = 'SpotlightWithShadowMap';
+            pass.setViewport(viewport);
+            pass.addRenderTarget(colorName, LoadOp.LOAD);
+            pass.addDepthStencil(depthStencilName, LoadOp.LOAD, storeOp);
+            pass.addTexture(`ShadowMap${id}`, 'cc_spotShadowMap');
+            const queue = pass.addQueue(rendering.QueueHint.BLEND, 'forward-add');
+            queue.addScene(
+                camera,
+                rendering.SceneFlags.BLEND,
+                light,
+            );
+        }
+        return pass;
+    }
+
+    public isMultipleLightPassesNeeded(): boolean {
+        return this.shadowEnabledSpotLights.length > 0;
+    }
+}
+
 if (rendering) {
 
     const { QueueHint, SceneFlags, ResourceFlags, ResourceResidency } = rendering;
-
-    class ForwardLighting {
-        // Active lights
-        private readonly lights: renderer.scene.Light[] = [];
-        // Active spot lights with shadows (Mutually exclusive with `lights`)
-        private readonly shadowEnabledSpotLights: renderer.scene.SpotLight[] = [];
-
-        // Internal cached resources
-        private readonly _sphere = Sphere.create(0, 0, 0, 1);
-        private readonly _boundingBox = new AABB();
-        private readonly _rangedDirLightBoundingBox = new AABB(0.0, 0.0, 0.0, 0.5, 0.5, 0.5);
-
-        // ----------------------------------------------------------------
-        // Interface
-        // ----------------------------------------------------------------
-        public cullLights(scene: renderer.RenderScene, frustum: geometry.Frustum, cameraPos?: Vec3): void {
-            // TODO(zhouzhenglong): Make light culling native
-            this.lights.length = 0;
-            this.shadowEnabledSpotLights.length = 0;
-            // spot lights
-            for (const light of scene.spotLights) {
-                if (light.baked) {
-                    continue;
-                }
-                Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
-                if (intersect.sphereFrustum(this._sphere, frustum)) {
-                    if (light.shadowEnabled) {
-                        this.shadowEnabledSpotLights.push(light);
-                    } else {
-                        this.lights.push(light);
-                    }
-                }
-            }
-            // sphere lights
-            for (const light of scene.sphereLights) {
-                if (light.baked) {
-                    continue;
-                }
-                Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
-                if (intersect.sphereFrustum(this._sphere, frustum)) {
-                    this.lights.push(light);
-                }
-            }
-            // point lights
-            for (const light of scene.pointLights) {
-                if (light.baked) {
-                    continue;
-                }
-                Sphere.set(this._sphere, light.position.x, light.position.y, light.position.z, light.range);
-                if (intersect.sphereFrustum(this._sphere, frustum)) {
-                    this.lights.push(light);
-                }
-            }
-            // ranged dir lights
-            for (const light of scene.rangedDirLights) {
-                AABB.transform(this._boundingBox, this._rangedDirLightBoundingBox, light.node!.getWorldMatrix());
-                if (intersect.aabbFrustum(this._boundingBox, frustum)) {
-                    this.lights.push(light);
-                }
-            }
-
-            if (cameraPos) {
-                this.shadowEnabledSpotLights.sort(
-                    (lhs, rhs) => Vec3.squaredDistance(cameraPos, lhs.position) - Vec3.squaredDistance(cameraPos, rhs.position),
-                );
-            }
-        }
-        private _addLightQueues(camera: renderer.scene.Camera, pass: rendering.BasicRenderPassBuilder): void {
-            for (const light of this.lights) {
-                const queue = pass.addQueue(QueueHint.BLEND, 'forward-add');
-                switch (light.type) {
-                    case LightType.SPHERE:
-                        queue.name = 'sphere-light';
-                        break;
-                    case LightType.SPOT:
-                        queue.name = 'spot-light';
-                        break;
-                    case LightType.POINT:
-                        queue.name = 'point-light';
-                        break;
-                    case LightType.RANGED_DIRECTIONAL:
-                        queue.name = 'ranged-directional-light';
-                        break;
-                    default:
-                        queue.name = 'unknown-light';
-                }
-                queue.addScene(
-                    camera,
-                    SceneFlags.BLEND,
-                    light,
-                );
-            }
-        }
-        public addSpotlightShadowPasses(
-            ppl: rendering.BasicPipeline,
-            camera: renderer.scene.Camera,
-            maxNumShadowMaps: number,
-        ): void {
-            let i = 0;
-            for (const light of this.shadowEnabledSpotLights) {
-                const shadowMapSize = ppl.pipelineSceneData.shadows.size;
-                const shadowPass = ppl.addRenderPass(shadowMapSize.x, shadowMapSize.y, 'default');
-                shadowPass.name = `SpotLightShadowPass${i}`;
-                shadowPass.addRenderTarget(`SpotShadowMap${i}`, LoadOp.CLEAR, StoreOp.STORE, new Color(1, 1, 1, 1));
-                shadowPass.addDepthStencil(`SpotShadowDepth${i}`, LoadOp.CLEAR, StoreOp.DISCARD);
-                shadowPass.addQueue(QueueHint.NONE, 'shadow-caster')
-                    .addScene(camera, SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER)
-                    .useLightFrustum(light);
-                ++i;
-                if (i >= maxNumShadowMaps) {
-                    break;
-                }
-            }
-        }
-        public addLightQueues(pass: rendering.BasicRenderPassBuilder,
-            camera: renderer.scene.Camera, maxNumShadowMaps: number): void {
-            this._addLightQueues(camera, pass);
-            let i = 0;
-            for (const light of this.shadowEnabledSpotLights) {
-                // Add spot-light pass
-                // Save last RenderPass to the `pass` variable
-                // TODO(zhouzhenglong): Fix per queue addTexture
-                pass.addTexture(`SpotShadowMap${i}`, 'cc_spotShadowMap');
-                const queue = pass.addQueue(QueueHint.BLEND, 'forward-add');
-                queue.addScene(camera, SceneFlags.BLEND, light);
-                ++i;
-                if (i >= maxNumShadowMaps) {
-                    break;
-                }
-            }
-        }
-
-        // Notice: ForwardLighting cannot handle a lot of lights.
-        // If there are too many lights, the performance will be very poor.
-        // If many lights are needed, please implement a forward+ or deferred rendering pipeline.
-        public addLightPasses(
-            colorName: string,
-            depthStencilName: string,
-            depthStencilStoreOp: gfx.StoreOp,
-            id: number, // window id
-            width: number,
-            height: number,
-            camera: renderer.scene.Camera,
-            viewport: gfx.Viewport,
-            ppl: rendering.BasicPipeline,
-            pass: rendering.BasicRenderPassBuilder,
-        ): rendering.BasicRenderPassBuilder {
-            this._addLightQueues(camera, pass);
-
-            let count = 0;
-            const shadowMapSize = ppl.pipelineSceneData.shadows.size;
-            for (const light of this.shadowEnabledSpotLights) {
-                const shadowPass = ppl.addRenderPass(shadowMapSize.x, shadowMapSize.y, 'default');
-                shadowPass.name = 'SpotlightShadowPass';
-                // Reuse csm shadow map
-                shadowPass.addRenderTarget(`ShadowMap${id}`, LoadOp.CLEAR, StoreOp.STORE, new Color(1, 1, 1, 1));
-                shadowPass.addDepthStencil(`ShadowDepth${id}`, LoadOp.CLEAR, StoreOp.DISCARD);
-                shadowPass.addQueue(QueueHint.NONE, 'shadow-caster')
-                    .addScene(camera, SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER)
-                    .useLightFrustum(light);
-
-                // Add spot-light pass
-                // Save last RenderPass to the `pass` variable
-                ++count;
-                const storeOp = count === this.shadowEnabledSpotLights.length
-                    ? depthStencilStoreOp
-                    : StoreOp.STORE;
-
-                pass = ppl.addRenderPass(width, height, 'default');
-                pass.name = 'SpotlightWithShadowMap';
-                pass.setViewport(viewport);
-                pass.addRenderTarget(colorName, LoadOp.LOAD);
-                pass.addDepthStencil(depthStencilName, LoadOp.LOAD, storeOp);
-                pass.addTexture(`ShadowMap${id}`, 'cc_spotShadowMap');
-                const queue = pass.addQueue(QueueHint.BLEND, 'forward-add');
-                queue.addScene(
-                    camera,
-                    SceneFlags.BLEND,
-                    light,
-                );
-            }
-            return pass;
-        }
-
-        public isMultipleLightPassesNeeded(): boolean {
-            return this.shadowEnabledSpotLights.length > 0;
-        }
-    }
 
     class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder {
         getConfigOrder(): number {
@@ -1232,7 +1232,7 @@ if (rendering) {
                 this._pipelineEvent.emit(PipelineEventType.RENDER_CAMERA_END, camera);
             }
         }
-        addPipelinePassBuilder?(camera: renderer.scene.Camera, passBuilder: rendering.PipelinePassBuilder): void {
+        addPipelinePassBuilder(camera: renderer.scene.Camera, passBuilder: rendering.PipelinePassBuilder): void {
             const passBuilders = this._pipelinePasses.get(camera);
             if (passBuilders) {
                 passBuilders.push(passBuilder);
@@ -1240,7 +1240,7 @@ if (rendering) {
                 this._pipelinePasses.set(camera, [passBuilder]);
             }
         }
-        removePipelinePassBuilder?(camera: renderer.scene.Camera, passBuilder: rendering.PipelinePassBuilder): void {
+        removePipelinePassBuilder(camera: renderer.scene.Camera, passBuilder: rendering.PipelinePassBuilder): void {
             const passBuilders = this._pipelinePasses.get(camera);
             if (passBuilders) {
                 const idx = passBuilders.indexOf(passBuilder);
