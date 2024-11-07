@@ -258,9 +258,8 @@ interface PipelineContext {
     nativeHeight: number;
     width: number;
     height: number;
-    radianceName: string;
-    sceneDepth: string;
-    ldrColorName: string;
+    colorName: string;
+    depthStencilName: string;
 }
 
 class ForwardLighting {
@@ -605,18 +604,6 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
             ? Math.max(Math.floor(context.nativeHeight * cameraConfigs.shadingScale), 1)
             : context.nativeHeight;
 
-        context.radianceName = cameraConfigs.enableShadingScale
-            ? `ScaledRadiance${id}`
-            : `Radiance${id}`;
-
-        context.sceneDepth = cameraConfigs.enableShadingScale
-            ? `ScaledSceneDepth${id}`
-            : `SceneDepth${id}`;
-
-        context.ldrColorName = cameraConfigs.enableShadingScale
-            ? `ScaledLdrColor${id}`
-            : `LdrColor${id}`;
-
         const scene = camera.scene!;
         const mainLight = scene.mainLight;
 
@@ -639,12 +626,25 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
 
         this._tryAddReflectionProbePasses(ppl, cameraConfigs, id, mainLight, camera.scene);
 
+        if (cameraConfigs.enablePostProcess || cameraConfigs.enableShadingScale || cameraConfigs.enableHDR) {
+            context.colorName = cameraConfigs.enableShadingScale
+                ? `ScaledRadiance${id}`
+                : `Radiance${id}`;
+            context.depthStencilName = cameraConfigs.enableShadingScale
+                ? `ScaledSceneDepth${id}`
+                : `SceneDepth${id}`;
+        } else {
+            context.colorName = cameraConfigs.colorName;
+            context.depthStencilName = cameraConfigs.depthStencilName;
+        }
+
         const pass = this._addForwardRadiancePasses(
             ppl, pplConfigs, cameraConfigs, id, camera,
             context.width, context.height, mainLight,
-            context.radianceName, context.sceneDepth,
+            context.colorName, context.depthStencilName,
             !cameraConfigs.enableMSAA,
             cameraConfigs.outputRadianceDepth ? StoreOp.STORE : StoreOp.DISCARD);
+
         return pass;
     }
     private _addCascadedShadowMapPass(
@@ -1058,7 +1058,6 @@ if (rendering) {
         // Internal cached resources
         private readonly _clearColor = new Color(0, 0, 0, 1);
         private readonly _clearColorTransparentBlack = new Color(0, 0, 0, 0);
-        private readonly _reflectionProbeClearColor = new Vec3(0, 0, 0);
         private readonly _viewport = new Viewport();
         private readonly _configs = new PipelineConfigs();
         private readonly _cameraConfigs = new CameraConfigs();
@@ -1085,24 +1084,9 @@ if (rendering) {
         // Internal States
         private _initialized = false; // TODO(zhouzhenglong): Make default effect asset loading earlier and remove this flag
 
-        // Forward lighting
-        private readonly forwardLighting = new ForwardLighting();
-
         // ----------------------------------------------------------------
         // Interface
         // ----------------------------------------------------------------
-        private _prepareBuiltinForwardPass(camera: renderer.scene.Camera): rendering.PipelinePassBuilder[] {
-            let passBuilders = this._pipelinePasses.get(camera);
-            if (!passBuilders) {
-                passBuilders = [this._forwardPass];
-                this._pipelinePasses.set(camera, passBuilders);
-                return passBuilders;
-            }
-            if (passBuilders.findIndex((builder) => builder === this._forwardPass) === -1) {
-                passBuilders.push(this._forwardPass);
-            }
-            return passBuilders;
-        }
         windowResize(
             ppl: rendering.BasicPipeline,
             window: renderer.RenderWindow,
@@ -1197,7 +1181,7 @@ if (rendering) {
 
                 // Build pipeline
                 if (this._cameraConfigs.useFullPipeline) {
-                    this._buildForwardPipeline(ppl, camera, camera.scene);
+                    this._buildForwardPipeline(ppl, camera, camera.scene, passBuilders);
                 } else {
                     this._buildSimplePipeline(ppl, camera);
                 }
@@ -1287,10 +1271,24 @@ if (rendering) {
                 .addScene(camera, flags);
         }
 
+        private _prepareBuiltinForwardPass(camera: renderer.scene.Camera): rendering.PipelinePassBuilder[] {
+            let passBuilders = this._pipelinePasses.get(camera);
+            if (!passBuilders) {
+                passBuilders = [this._forwardPass];
+                this._pipelinePasses.set(camera, passBuilders);
+                return passBuilders;
+            }
+            if (passBuilders.findIndex((builder) => builder === this._forwardPass) === -1) {
+                passBuilders.push(this._forwardPass);
+            }
+            return passBuilders;
+        }
+
         private _buildForwardPipeline(
             ppl: rendering.BasicPipeline,
             camera: renderer.scene.Camera,
             scene: renderer.RenderScene,
+            passBuilders: rendering.PipelinePassBuilder[],
         ): void {
             // Init
             const settings = this._cameraConfigs.settings;
@@ -1304,69 +1302,58 @@ if (rendering) {
                 : nativeHeight;
             const id = camera.window.renderWindowId;
             const colorName = this._cameraConfigs.colorName;
-            const sceneDepth = this._cameraConfigs.enableShadingScale
-                ? `ScaledSceneDepth${id}`
-                : `SceneDepth${id}`;
-            const radianceName = this._cameraConfigs.enableShadingScale
-                ? `ScaledRadiance${id}`
-                : `Radiance${id}`;
             const ldrColorName = this._cameraConfigs.enableShadingScale
                 ? `ScaledLdrColor${id}`
                 : `LdrColor${id}`;
-            const mainLight = scene.mainLight;
 
-            // Forward Lighting (Light Culling)
-            this.forwardLighting.cullLights(scene, camera.frustum);
+            let context: PipelineContext = {
+                nativeWidth,
+                nativeHeight,
+                width,
+                height,
+                colorName: '',
+                depthStencilName: '',
+            };
 
-            // Main Directional light CSM Shadow Map
-            if (this._cameraConfigs.enableMainLightShadowMap) {
-                assert(!!mainLight);
-                this._addCascadedShadowMapPass(ppl, id, mainLight, camera);
+            let lastPass: rendering.BasicRenderPassBuilder | undefined = undefined;
+
+            for (const builder of passBuilders) {
+                if (builder.setup) {
+                    lastPass = builder.setup(ppl, this._configs, this._cameraConfigs, camera, context, lastPass);
+                }
             }
-
-            // Spot light shadow maps (Mobile or MSAA)
-            if (this._cameraConfigs.singleForwardRadiancePass) {
-                // Currently, only support 1 spot light with shadow map on mobile platform.
-                // TODO(zhouzhenglong): Relex this limitation.
-                this.forwardLighting.addSpotlightShadowPasses(ppl, camera, this._configs.mobileMaxSpotLightShadowMaps);
-            }
-
-            this._tryAddReflectionProbePasses(ppl, id, mainLight, camera.scene);
 
             // Forward Lighting
-            let lastPass: rendering.BasicRenderPassBuilder;
             if (this._cameraConfigs.enablePostProcess) { // Post Process
                 // Radiance and DoF
                 if (this._cameraConfigs.enableDOF) {
                     assert(!!settings.depthOfField.material);
-                    const dofRadianceName = `DofRadiance${id}`;
-                    // Disable MSAA, depth stencil cannot be resolved cross-platformly
-                    this._addForwardRadiancePasses(ppl, id, camera, width, height, mainLight,
-                        dofRadianceName, sceneDepth, true, StoreOp.STORE);
+                    const prevColorName = context.colorName;
+                    const prevDepthStencilName = context.depthStencilName;
+
+                    context.colorName = `DofRadiance${id}`;
+
                     this._addDepthOfFieldPasses(ppl, settings, settings.depthOfField.material,
                         id, camera, width, height,
-                        dofRadianceName, sceneDepth, radianceName, ldrColorName);
-                } else {
-                    this._addForwardRadiancePasses(
-                        ppl, id, camera, width, height, mainLight,
-                        radianceName, sceneDepth);
+                        prevColorName, prevDepthStencilName, context.colorName, ldrColorName);
                 }
+
                 // Bloom
                 if (this._cameraConfigs.enableBloom) {
                     assert(!!settings.bloom.material);
                     this._addKawaseDualFilterBloomPasses(
                         ppl, settings, settings.bloom.material,
-                        id, width, height, radianceName);
+                        id, width, height, context.colorName);
                 }
                 // Tone Mapping and FXAA
                 if (this._cameraConfigs.enableFXAA) {
                     assert(!!settings.fxaa.material);
                     const copyAndTonemapPassNeeded = this._cameraConfigs.enableHDR
                         || this._cameraConfigs.enableColorGrading;
-                    const ldrColorBufferName = copyAndTonemapPassNeeded ? ldrColorName : radianceName;
+                    const ldrColorBufferName = copyAndTonemapPassNeeded ? ldrColorName : context.colorName;
                     // FXAA is applied after tone mapping
                     if (copyAndTonemapPassNeeded) {
-                        this._addCopyAndTonemapPass(ppl, settings, width, height, radianceName, ldrColorBufferName);
+                        this._addCopyAndTonemapPass(ppl, settings, width, height, context.colorName, ldrColorBufferName);
                     }
                     // Apply FXAA
                     if (this._cameraConfigs.enableShadingScale) {
@@ -1393,22 +1380,19 @@ if (rendering) {
                 } else {
                     // No FXAA (Size might be scaled)
                     lastPass = this._addTonemapResizeOrSuperResolutionPasses(ppl, settings, id,
-                        width, height, radianceName, ldrColorName,
+                        width, height, context.colorName, ldrColorName,
                         nativeWidth, nativeHeight, colorName);
                 }
             } else if (this._cameraConfigs.enableHDR || this._cameraConfigs.enableShadingScale) { // HDR or Scaled LDR
-                this._addForwardRadiancePasses(ppl, id, camera,
-                    width, height, mainLight, radianceName, sceneDepth);
                 lastPass = this._addTonemapResizeOrSuperResolutionPasses(ppl, settings, id,
-                    width, height, radianceName, ldrColorName,
+                    width, height, context.colorName, ldrColorName,
                     nativeWidth, nativeHeight, colorName);
             } else { // LDR (Size is not scaled)
-                lastPass = this._addForwardRadiancePasses(ppl, id, camera,
-                    nativeWidth, nativeHeight, mainLight,
-                    colorName, this._cameraConfigs.depthStencilName);
+                // noop
             }
 
             // UI size is not scaled, does not have AA
+            assert(lastPass !== undefined);
             this._addUIQueue(camera, lastPass);
         }
 
@@ -1442,44 +1426,6 @@ if (rendering) {
                     nativeWidth, nativeHeight, radianceName, colorName);
             }
             return lastPass;
-        }
-
-        private _addCascadedShadowMapPass(
-            ppl: rendering.BasicPipeline,
-            id: number,
-            light: renderer.scene.DirectionalLight,
-            camera: renderer.scene.Camera,
-        ): void {
-            // ----------------------------------------------------------------
-            // Dynamic states
-            // ----------------------------------------------------------------
-            const width = ppl.pipelineSceneData.shadows.size.x;
-            const height = ppl.pipelineSceneData.shadows.size.y;
-            this._viewport.left = 0;
-            this._viewport.top = 0;
-            this._viewport.width = width;
-            this._viewport.height = height;
-
-            // ----------------------------------------------------------------
-            // CSM Shadow Map
-            // ----------------------------------------------------------------
-            const pass = ppl.addRenderPass(width, height, 'default');
-            pass.name = 'CascadedShadowMap';
-            pass.addRenderTarget(`ShadowMap${id}`, LoadOp.CLEAR, StoreOp.STORE, new Color(1, 1, 1, 1));
-            pass.addDepthStencil(`ShadowDepth${id}`, LoadOp.CLEAR, StoreOp.DISCARD);
-            const csmLevel = ppl.pipelineSceneData.csmSupported ? light.csmLevel : 1;
-
-            // Add shadow map viewports
-            for (let level = 0; level !== csmLevel; ++level) {
-                getCsmMainLightViewport(light, width, height, level, this._viewport, this._configs.screenSpaceSignY);
-                const queue = pass.addQueue(QueueHint.NONE, 'shadow-caster');
-                if (!this._configs.isWebGPU) { // Temporary workaround for WebGPU
-                    queue.setViewport(this._viewport);
-                }
-                queue
-                    .addScene(camera, SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.SHADOW_CASTER)
-                    .useLightFrustum(light, level);
-            }
         }
 
         private _addCopyPass(
@@ -1541,64 +1487,6 @@ if (rendering) {
                 }
             }
             return pass;
-        }
-
-        private _buildForwardMainLightPass(
-            pass: rendering.BasicRenderPassBuilder,
-            id: number,
-            camera: renderer.scene.Camera,
-            colorName: string,
-            depthStencilName: string,
-            depthStencilStoreOp: gfx.StoreOp,
-            mainLight: renderer.scene.DirectionalLight | null,
-            scene: renderer.RenderScene | null = null,
-        ): void {
-            // set viewport
-            pass.setViewport(this._viewport);
-
-            const colorStoreOp = this._cameraConfigs.enableMSAA ? StoreOp.DISCARD : StoreOp.STORE;
-
-            // bind output render target
-            if (forwardNeedClearColor(camera)) {
-                pass.addRenderTarget(colorName, LoadOp.CLEAR, colorStoreOp, this._clearColor);
-            } else {
-                pass.addRenderTarget(colorName, LoadOp.LOAD, colorStoreOp);
-            }
-
-            // bind depth stencil buffer
-            if (DEBUG) {
-                if (colorName === this._cameraConfigs.colorName &&
-                    depthStencilName !== this._cameraConfigs.depthStencilName) {
-                    warn('Default framebuffer cannot use custom depth stencil buffer');
-                }
-            }
-
-            if (camera.clearFlag & ClearFlagBit.DEPTH_STENCIL) {
-                pass.addDepthStencil(
-                    depthStencilName,
-                    LoadOp.CLEAR,
-                    depthStencilStoreOp,
-                    camera.clearDepth,
-                    camera.clearStencil,
-                    camera.clearFlag & ClearFlagBit.DEPTH_STENCIL,
-                );
-            } else {
-                pass.addDepthStencil(depthStencilName, LoadOp.LOAD, depthStencilStoreOp);
-            }
-
-            // Set shadow map if enabled
-            if (this._cameraConfigs.enableMainLightShadowMap) {
-                pass.addTexture(`ShadowMap${id}`, 'cc_shadowMap');
-            }
-
-            // TODO(zhouzhenglong): Separate OPAQUE and MASK queue
-
-            // add opaque and mask queue
-            pass.addQueue(QueueHint.NONE) // Currently we put OPAQUE and MASK into one queue, so QueueHint is NONE
-                .addScene(camera,
-                    SceneFlags.OPAQUE | SceneFlags.MASK,
-                    mainLight || undefined,
-                    scene ? scene : undefined);
         }
 
         private _addDepthOfFieldPasses(
@@ -1820,289 +1708,6 @@ if (rendering) {
             pass
                 .addQueue(QueueHint.BLEND, 'default', 'default')
                 .addScene(camera, flags);
-        }
-
-        // ----------------------------------------------------------------
-        // Forward
-        // ----------------------------------------------------------------
-        private _addForwardRadiancePasses(
-            ppl: rendering.BasicPipeline,
-            id: number,
-            camera: renderer.scene.Camera,
-            width: number,
-            height: number,
-            mainLight: renderer.scene.DirectionalLight | null,
-            colorName: string,
-            depthStencilName: string,
-            disableMSAA: boolean = false,
-            depthStencilStoreOp: gfx.StoreOp = StoreOp.DISCARD,
-        ): rendering.BasicRenderPassBuilder {
-            // ----------------------------------------------------------------
-            // Dynamic states
-            // ----------------------------------------------------------------
-            // Prepare camera clear color
-            const clearColor = camera.clearColor; // Reduce C++/TS interop
-            this._clearColor.x = clearColor.x;
-            this._clearColor.y = clearColor.y;
-            this._clearColor.z = clearColor.z;
-            this._clearColor.w = clearColor.w;
-
-            // Prepare camera viewport
-            const viewport = camera.viewport; // Reduce C++/TS interop
-            this._viewport.left = Math.round(viewport.x * width);
-            this._viewport.top = Math.round(viewport.y * height);
-            // Here we must use camera.viewport.width instead of camera.viewport.z, which
-            // is undefined on native platform. The same as camera.viewport.height.
-            this._viewport.width = Math.max(Math.round(viewport.width * width), 1);
-            this._viewport.height = Math.max(Math.round(viewport.height * height), 1);
-
-            // MSAA
-            const enableMSAA = !disableMSAA && this._cameraConfigs.enableMSAA;
-            assert(!enableMSAA || this._cameraConfigs.singleForwardRadiancePass);
-
-            // ----------------------------------------------------------------
-            // Forward Lighting (Main Directional Light)
-            // ----------------------------------------------------------------
-            const pass = this._cameraConfigs.singleForwardRadiancePass
-                ? this._addForwardSingleRadiancePass(ppl, id, camera, enableMSAA, width, height, mainLight,
-                    colorName, depthStencilName, depthStencilStoreOp)
-                : this._addForwardMultipleRadiancePasses(ppl, id, camera, width, height, mainLight,
-                    colorName, depthStencilName, depthStencilStoreOp);
-
-            // Planar Shadow
-            if (this._cameraConfigs.enableMainLightPlanarShadowMap) {
-                this.addPlanarShadowQueue(camera, mainLight, pass);
-            }
-
-            // ----------------------------------------------------------------
-            // Forward Lighting (Blend)
-            // ----------------------------------------------------------------
-            // Add transparent queue
-
-            const sceneFlags = SceneFlags.BLEND |
-                (camera.geometryRenderer
-                    ? SceneFlags.GEOMETRY
-                    : SceneFlags.NONE);
-
-            pass
-                .addQueue(QueueHint.BLEND)
-                .addScene(camera, sceneFlags, mainLight || undefined);
-
-            return pass;
-        }
-
-        private _addForwardSingleRadiancePass(
-            ppl: rendering.BasicPipeline,
-            id: number,
-            camera: renderer.scene.Camera,
-            enableMSAA: boolean,
-            width: number,
-            height: number,
-            mainLight: renderer.scene.DirectionalLight | null,
-            colorName: string,
-            depthStencilName: string,
-            depthStencilStoreOp: gfx.StoreOp
-        ): rendering.BasicRenderPassBuilder {
-            assert(this._cameraConfigs.singleForwardRadiancePass);
-            // ----------------------------------------------------------------
-            // Forward Lighting (Main Directional Light)
-            // ----------------------------------------------------------------
-            let pass: rendering.BasicRenderPassBuilder;
-            if (enableMSAA) {
-                const msaaRadianceName = `MsaaRadiance${id}`;
-                const msaaDepthStencilName = `MsaaDepthStencil${id}`;
-                const sampleCount = this._cameraConfigs.settings.msaa.sampleCount;
-
-                const msPass = ppl.addMultisampleRenderPass(width, height, sampleCount, 0, 'default');
-                msPass.name = 'MsaaForwardPass';
-
-                // MSAA always discards depth stencil
-                this._buildForwardMainLightPass(msPass, id, camera,
-                    msaaRadianceName, msaaDepthStencilName, StoreOp.DISCARD, mainLight);
-
-                msPass.resolveRenderTarget(msaaRadianceName, colorName);
-
-                pass = msPass;
-            } else {
-                pass = ppl.addRenderPass(width, height, 'default');
-                pass.name = 'ForwardPass';
-
-                this._buildForwardMainLightPass(pass, id, camera,
-                    colorName, depthStencilName, depthStencilStoreOp, mainLight);
-            }
-            assert(pass !== undefined);
-
-            // Forward Lighting (Additive Lights)
-            this.forwardLighting.addLightQueues(
-                pass,
-                camera,
-                this._configs.mobileMaxSpotLightShadowMaps,
-            );
-
-            return pass;
-        }
-        public addPlanarShadowQueue(
-            camera: renderer.scene.Camera,
-            mainLight: renderer.scene.DirectionalLight | null,
-            pass: rendering.BasicRenderPassBuilder,
-        ) {
-            pass.addQueue(QueueHint.BLEND, 'planar-shadow')
-                .addScene(
-                    camera,
-                    SceneFlags.SHADOW_CASTER | SceneFlags.PLANAR_SHADOW | SceneFlags.BLEND,
-                    mainLight || undefined,
-                );
-        }
-        private _addForwardMultipleRadiancePasses(
-            ppl: rendering.BasicPipeline,
-            id: number,
-            camera: renderer.scene.Camera,
-            width: number,
-            height: number,
-            mainLight: renderer.scene.DirectionalLight | null,
-            colorName: string,
-            depthStencilName: string,
-            depthStencilStoreOp: gfx.StoreOp
-        ): rendering.BasicRenderPassBuilder {
-            assert(!this._cameraConfigs.singleForwardRadiancePass);
-
-            // Forward Lighting (Main Directional Light)
-            let pass = ppl.addRenderPass(width, height, 'default');
-            pass.name = 'ForwardPass';
-
-            const firstStoreOp = this.forwardLighting.isMultipleLightPassesNeeded()
-                ? StoreOp.STORE
-                : depthStencilStoreOp;
-
-            this._buildForwardMainLightPass(pass, id, camera,
-                colorName, depthStencilName, firstStoreOp, mainLight);
-
-            // Forward Lighting (Additive Lights)
-            pass = this.forwardLighting
-                .addLightPasses(colorName, depthStencilName, depthStencilStoreOp,
-                    id, width, height, camera, this._viewport, ppl, pass);
-
-            return pass;
-        }
-
-        private _buildReflectionProbePass(
-            pass: rendering.BasicRenderPassBuilder,
-            id: number,
-            camera: renderer.scene.Camera,
-            colorName: string,
-            depthStencilName: string,
-            mainLight: renderer.scene.DirectionalLight | null,
-            scene: renderer.RenderScene | null = null,
-        ): void {
-            // set viewport
-            const colorStoreOp = this._cameraConfigs.enableMSAA ? StoreOp.DISCARD : StoreOp.STORE;
-
-            // bind output render target
-            if (forwardNeedClearColor(camera)) {
-                this._reflectionProbeClearColor.x = camera.clearColor.x;
-                this._reflectionProbeClearColor.y = camera.clearColor.y;
-                this._reflectionProbeClearColor.z = camera.clearColor.z;
-                const clearColor = rendering.packRGBE(this._reflectionProbeClearColor);
-                this._clearColor.x = clearColor.x;
-                this._clearColor.y = clearColor.y;
-                this._clearColor.z = clearColor.z;
-                this._clearColor.w = clearColor.w;
-                pass.addRenderTarget(colorName, LoadOp.CLEAR, colorStoreOp, this._clearColor);
-            } else {
-                pass.addRenderTarget(colorName, LoadOp.LOAD, colorStoreOp);
-            }
-
-            // bind depth stencil buffer
-            if (camera.clearFlag & ClearFlagBit.DEPTH_STENCIL) {
-                pass.addDepthStencil(
-                    depthStencilName,
-                    LoadOp.CLEAR,
-                    StoreOp.DISCARD,
-                    camera.clearDepth,
-                    camera.clearStencil,
-                    camera.clearFlag & ClearFlagBit.DEPTH_STENCIL,
-                );
-            } else {
-                pass.addDepthStencil(depthStencilName, LoadOp.LOAD, StoreOp.DISCARD);
-            }
-
-            // Set shadow map if enabled
-            if (this._cameraConfigs.enableMainLightShadowMap) {
-                pass.addTexture(`ShadowMap${id}`, 'cc_shadowMap');
-            }
-
-            // TODO(zhouzhenglong): Separate OPAQUE and MASK queue
-
-            // add opaque and mask queue
-            pass.addQueue(QueueHint.NONE, 'reflect-map') // Currently we put OPAQUE and MASK into one queue, so QueueHint is NONE
-                .addScene(camera,
-                    SceneFlags.OPAQUE | SceneFlags.MASK | SceneFlags.REFLECTION_PROBE,
-                    mainLight || undefined,
-                    scene ? scene : undefined);
-        }
-
-        private _tryAddReflectionProbePasses(ppl: rendering.BasicPipeline, id: number,
-            mainLight: renderer.scene.DirectionalLight | null,
-            scene: renderer.RenderScene | null,
-        ): void {
-            const reflectionProbeManager = cclegacy.internal.reflectionProbeManager as ReflectionProbeManager | undefined;
-            if (!reflectionProbeManager) {
-                return;
-            }
-            const probes = reflectionProbeManager.getProbes();
-            const maxProbeCount = 4;
-            let probeID = 0;
-            for (const probe of probes) {
-                if (!probe.needRender) {
-                    continue;
-                }
-                const area = probe.renderArea();
-                const width = Math.max(Math.floor(area.x), 1);
-                const height = Math.max(Math.floor(area.y), 1);
-
-                if (probe.probeType === renderer.scene.ProbeType.PLANAR) {
-                    if (!this._cameraConfigs.enablePlanarReflectionProbe) {
-                        continue;
-                    }
-                    const window: renderer.RenderWindow = probe.realtimePlanarTexture!.window!;
-                    const colorName = `PlanarProbeRT${probeID}`;
-                    const depthStencilName = `PlanarProbeDS${probeID}`;
-                    // ProbeResource
-                    ppl.addRenderWindow(colorName,
-                        this._cameraConfigs.radianceFormat, width, height, window);
-                    ppl.addDepthStencil(depthStencilName,
-                        gfx.Format.DEPTH_STENCIL, width, height, ResourceResidency.MEMORYLESS);
-
-                    // Rendering
-                    const probePass = ppl.addRenderPass(width, height, 'default');
-                    probePass.name = `PlanarReflectionProbe${probeID}`;
-                    this._buildReflectionProbePass(probePass, id, probe.camera,
-                        colorName, depthStencilName, mainLight, scene);
-                } else if (EDITOR) {
-                    for (let faceIdx = 0; faceIdx < probe.bakedCubeTextures.length; faceIdx++) {
-                        probe.updateCameraDir(faceIdx);
-                        const window: renderer.RenderWindow = probe.bakedCubeTextures[faceIdx].window!;
-                        const colorName = `CubeProbeRT${probeID}${faceIdx}`;
-                        const depthStencilName = `CubeProbeDS${probeID}${faceIdx}`;
-                        // ProbeResource
-                        ppl.addRenderWindow(colorName,
-                            this._cameraConfigs.radianceFormat, width, height, window);
-                        ppl.addDepthStencil(depthStencilName,
-                            gfx.Format.DEPTH_STENCIL, width, height, ResourceResidency.MEMORYLESS);
-
-                        // Rendering
-                        const probePass = ppl.addRenderPass(width, height, 'default');
-                        probePass.name = `CubeProbe${probeID}${faceIdx}`;
-                        this._buildReflectionProbePass(probePass, id, probe.camera,
-                            colorName, depthStencilName, mainLight, scene);
-                    }
-                    probe.needRender = false;
-                }
-                ++probeID;
-                if (probeID === maxProbeCount) {
-                    break;
-                }
-            }
         }
 
         private _initMaterials(ppl: rendering.BasicPipeline): number {
