@@ -281,17 +281,13 @@
         "enabled": false,
         "sampleCount": 4
       },
-      "enableShadingScale": false,
+      "enableShadingScale": true,
       "shadingScale": 0.7,
       "depthOfField": {
         "enabled": true,
         "focusDistance": 10,
         "focusRange": 4,
         "bokehRadius": 1,
-        "material": {
-          "__uuid__": "8af64728-cb91-4594-b5e9-364a46b70c17",
-          "__expectedType__": "cc.Material"
-        },
         "minRange": 1,
         "maxRange": 1,
         "blurRadius": 2,
@@ -301,6 +297,10 @@
           "x": 0,
           "y": 2,
           "z": 1.402
+        },
+        "material": {
+          "__uuid__": "8af64728-cb91-4594-b5e9-364a46b70c17",
+          "__expectedType__": "cc.Material"
         }
       },
       "bloom": {

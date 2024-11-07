@@ -189,36 +189,41 @@ function setupPostProcessConfigs(
         || cameraConfigs.enableFXAA);
 }
 
+function sortPipelinePassBuildersByConfigOrder(passBuilders: rendering.PipelinePassBuilder[]): void {
+    passBuilders.sort((a, b) => {
+        return a.getConfigOrder() - b.getConfigOrder();
+    });
+}
+
+function sortPipelinePassBuildersByRenderOrder(passBuilders: rendering.PipelinePassBuilder[]): void {
+    passBuilders.sort((a, b) => {
+        return a.getRenderOrder() - b.getRenderOrder();
+    });
+}
+
 function setupCameraConfigs(
     camera: renderer.scene.Camera,
     pipelineConfigs: PipelineConfigs,
     cameraConfigs: CameraConfigs,
+    forwardPass: BuiltinForwardPassBuilder,
+    passBuilders?: rendering.PipelinePassBuilder[],
 ): void {
+    if (passBuilders) {
+        sortPipelinePassBuildersByConfigOrder(passBuilders);
+    }
     const window = camera.window;
     const isMainGameWindow: boolean = camera.cameraUsage === CameraUsage.GAME && !!window.swapchain;
-    const isEditorView: boolean = camera.cameraUsage === CameraUsage.SCENE_VIEW || camera.cameraUsage === CameraUsage.PREVIEW;
 
     cameraConfigs.isMainGameWindow = isMainGameWindow;
     cameraConfigs.colorName = window.colorName;
     cameraConfigs.depthStencilName = window.depthStencilName;
 
     cameraConfigs.useFullPipeline = (camera.visibility & (Layers.Enum.DEFAULT)) !== 0;
-
-    cameraConfigs.enableMainLightShadowMap = pipelineConfigs.shadowEnabled
-        && !pipelineConfigs.usePlanarShadow
-        && !!camera.scene
-        && !!camera.scene.mainLight
-        && camera.scene.mainLight.shadowEnabled;
-
-    cameraConfigs.enableMainLightPlanarShadowMap = pipelineConfigs.shadowEnabled
-        && pipelineConfigs.usePlanarShadow
-        && !!camera.scene
-        && !!camera.scene.mainLight
-        && camera.scene.mainLight.shadowEnabled;
-
-    cameraConfigs.enablePlanarReflectionProbe = isMainGameWindow || camera.cameraUsage === CameraUsage.SCENE_VIEW;
-
     cameraConfigs.enableProfiler = DEBUG && isMainGameWindow;
+
+    const isEditorView: boolean
+        = camera.cameraUsage === CameraUsage.SCENE_VIEW
+        || camera.cameraUsage === CameraUsage.PREVIEW;
 
     if (isEditorView) {
         const editorSettings = rendering.getEditorPipelineSettings() as PipelineSettings | null;
@@ -237,31 +242,34 @@ function setupCameraConfigs(
 
     setupPostProcessConfigs(pipelineConfigs, cameraConfigs.settings, cameraConfigs);
 
-    // MSAA
-    cameraConfigs.enableMSAA = cameraConfigs.settings.msaa.enabled
-        && !pipelineConfigs.isWeb // TODO(zhouzhenglong): remove this constraint
-        && !pipelineConfigs.isWebGL1;
-
-    // Shading scale
-    cameraConfigs.shadingScale = cameraConfigs.settings.shadingScale;
-    cameraConfigs.enableShadingScale = cameraConfigs.settings.enableShadingScale
-        && cameraConfigs.shadingScale !== 1.0;
+    if (passBuilders) {
+        let i = 0;
+        for (; i !== passBuilders.length; ++i) {
+            const builder = passBuilders[i];
+            if (builder.getConfigOrder() < BuiltinForwardPassBuilder.ConfigOrder) {
+                if (builder.configCamera) {
+                    builder.configCamera(camera, pipelineConfigs, cameraConfigs);
+                }
+                continue;
+            }
+            break;
+        }
+        forwardPass.configCamera(camera, pipelineConfigs, cameraConfigs);
+        for (; i !== passBuilders.length; ++i) {
+            const builder = passBuilders[i];
+            if (builder.configCamera) {
+                builder.configCamera(camera, pipelineConfigs, cameraConfigs);
+            }
+        }
+    } else {
+        forwardPass.configCamera(camera, pipelineConfigs, cameraConfigs);
+    }
 
     // FSR (Depend on Shading scale)
     cameraConfigs.enableFSR = cameraConfigs.settings.fsr.enabled
         && !!cameraConfigs.settings.fsr.material
         && cameraConfigs.enableShadingScale
         && cameraConfigs.shadingScale < 1.0;
-
-    // Forward rendering (Depend on MSAA and TBR)
-    cameraConfigs.singleForwardRadiancePass
-        = pipelineConfigs.isMobile || cameraConfigs.enableMSAA;
-
-    cameraConfigs.enableHDR = cameraConfigs.useFullPipeline
-        && pipelineConfigs.useFloatOutput;
-
-    cameraConfigs.radianceFormat = cameraConfigs.enableHDR
-        ? gfx.Format.RGBA16F : gfx.Format.RGBA8;
 }
 
 interface PipelineContext {
@@ -463,11 +471,13 @@ class ForwardLighting {
 }
 
 export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder {
+    static ConfigOrder = 200;
+    static RenderOrder = 100;
     getConfigOrder(): number {
-        return 200;
+        return BuiltinForwardPassBuilder.ConfigOrder;
     }
     getRenderOrder(): number {
-        return 100;
+        return BuiltinForwardPassBuilder.RenderOrder;
     }
     configCamera(
         camera: Readonly<renderer.scene.Camera>,
@@ -1108,7 +1118,9 @@ if (rendering) {
             nativeHeight: number,
         ): void {
             setupPipelineConfigs(ppl, this._configs);
-            setupCameraConfigs(camera, this._configs, this._cameraConfigs);
+            const passBuilders = this._pipelinePasses.get(camera);
+            setupCameraConfigs(camera, this._configs, this._cameraConfigs, this._forwardPass, passBuilders);
+
             const settings = this._cameraConfigs.settings;
             const id = window.renderWindowId;
 
@@ -1233,7 +1245,8 @@ if (rendering) {
                     continue;
                 }
                 // Setup camera configs
-                setupCameraConfigs(camera, this._configs, this._cameraConfigs);
+                setupCameraConfigs(camera, this._configs, this._cameraConfigs,
+                    this._forwardPass, this._pipelinePasses.get(camera));
                 // log(`Setup camera: ${camera.node!.name}, window: ${camera.window.renderWindowId}, isFull: ${this._cameraConfigs.useFullPipeline}, `
                 //     + `size: ${camera.window.width}x${camera.window.height}`);
 
