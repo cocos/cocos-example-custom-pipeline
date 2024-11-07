@@ -281,7 +281,7 @@
         "enabled": false,
         "sampleCount": 4
       },
-      "enableShadingScale": true,
+      "enableShadingScale": false,
       "shadingScale": 0.7,
       "depthOfField": {
         "enabled": true,

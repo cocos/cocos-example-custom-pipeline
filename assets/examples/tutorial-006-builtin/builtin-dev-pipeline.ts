@@ -1118,8 +1118,37 @@ if (rendering) {
             nativeHeight: number,
         ): void {
             setupPipelineConfigs(ppl, this._configs);
+
             const passBuilders = this._pipelinePasses.get(camera);
             setupCameraConfigs(camera, this._configs, this._cameraConfigs, this._forwardPass, passBuilders);
+
+            if (passBuilders) {
+                let i = 0;
+                for (; i !== passBuilders.length; ++i) {
+                    const passBuilder = passBuilders[i];
+                    if (passBuilder.getConfigOrder() < BuiltinForwardPassBuilder.ConfigOrder) {
+                        if (passBuilder.windowResize) {
+                            passBuilder.windowResize(ppl, this._configs, this._cameraConfigs,
+                                window, camera, nativeWidth, nativeHeight);
+                        }
+                        continue;
+                    }
+                    break;
+                }
+                this._forwardPass.windowResize(ppl, this._configs, this._cameraConfigs,
+                    window, camera, nativeWidth, nativeHeight);
+
+                for (; i !== passBuilders.length; ++i) {
+                    const passBuilder = passBuilders[i];
+                    if (passBuilder.windowResize) {
+                        passBuilder.windowResize(ppl, this._configs, this._cameraConfigs,
+                            window, camera, nativeWidth, nativeHeight);
+                    }
+                }
+            } else {
+                this._forwardPass.windowResize(ppl, this._configs, this._cameraConfigs,
+                    window, camera, nativeWidth, nativeHeight);
+            }
 
             const settings = this._cameraConfigs.settings;
             const id = window.renderWindowId;
@@ -1136,67 +1165,8 @@ if (rendering) {
                 Format.RGBA8, nativeWidth, nativeHeight, window,
                 this._cameraConfigs.depthStencilName);
 
-            if (this._cameraConfigs.enableShadingScale) {
-                ppl.addDepthStencil(`ScaledSceneDepth${id}`, Format.DEPTH_STENCIL, width, height);
-                ppl.addRenderTarget(`ScaledRadiance${id}`, this._cameraConfigs.radianceFormat, width, height);
-                ppl.addRenderTarget(`ScaledLdrColor${id}`, Format.RGBA8, width, height);
-            } else {
-                ppl.addDepthStencil(`SceneDepth${id}`, Format.DEPTH_STENCIL, width, height);
-                ppl.addRenderTarget(`Radiance${id}`, this._cameraConfigs.radianceFormat, width, height);
-                ppl.addRenderTarget(`LdrColor${id}`, Format.RGBA8, width, height);
-            }
-
             if (this._cameraConfigs.enableFSR) {
                 ppl.addRenderTarget(`FsrColor${id}`, Format.RGBA8, nativeWidth, nativeHeight);
-            }
-
-            // MsaaRadiance
-            if (this._cameraConfigs.enableMSAA) {
-                // Notice: We never store multisample results.
-                // These samples are always resolved and discarded at the end of the render pass.
-                // So the ResourceResidency should be MEMORYLESS.
-                if (this._cameraConfigs.enableHDR) {
-                    ppl.addTexture(`MsaaRadiance${id}`, TextureType.TEX2D, this._cameraConfigs.radianceFormat, width, height, 1, 1, 1,
-                        settings.msaa.sampleCount, ResourceFlags.COLOR_ATTACHMENT, ResourceResidency.MEMORYLESS);
-                } else {
-                    ppl.addTexture(`MsaaRadiance${id}`, TextureType.TEX2D, Format.RGBA8, width, height, 1, 1, 1,
-                        settings.msaa.sampleCount, ResourceFlags.COLOR_ATTACHMENT, ResourceResidency.MEMORYLESS);
-                }
-                ppl.addTexture(`MsaaDepthStencil${id}`, TextureType.TEX2D, Format.DEPTH_STENCIL, width, height, 1, 1, 1,
-                    settings.msaa.sampleCount, ResourceFlags.DEPTH_STENCIL_ATTACHMENT, ResourceResidency.MEMORYLESS);
-            }
-
-            // Mainlight ShadowMap
-            ppl.addRenderTarget(
-                `ShadowMap${id}`,
-                this._configs.shadowMapFormat,
-                this._configs.shadowMapSize.x,
-                this._configs.shadowMapSize.y,
-            );
-            ppl.addDepthStencil(
-                `ShadowDepth${id}`,
-                Format.DEPTH_STENCIL,
-                this._configs.shadowMapSize.x,
-                this._configs.shadowMapSize.y,
-            );
-
-            // Spot-light shadow maps
-            if (this._cameraConfigs.singleForwardRadiancePass) {
-                const count = this._configs.mobileMaxSpotLightShadowMaps;
-                for (let i = 0; i !== count; ++i) {
-                    ppl.addRenderTarget(
-                        `SpotShadowMap${i}`,
-                        this._configs.shadowMapFormat,
-                        this._configs.shadowMapSize.x,
-                        this._configs.shadowMapSize.y,
-                    );
-                    ppl.addDepthStencil(
-                        `SpotShadowDepth${i}`,
-                        Format.DEPTH_STENCIL,
-                        this._configs.shadowMapSize.x,
-                        this._configs.shadowMapSize.y,
-                    );
-                }
             }
 
             // ---------------------------------------------------------
