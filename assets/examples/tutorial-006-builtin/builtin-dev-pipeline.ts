@@ -220,19 +220,22 @@ function setupCameraConfigs(
 
     cameraConfigs.enableProfiler = DEBUG && isMainGameWindow;
 
-    cameraConfigs.settings = camera.pipelineSettings
-        ? camera.pipelineSettings as PipelineSettings : defaultSettings;
-
-    setupPostProcessConfigs(pipelineConfigs, cameraConfigs.settings, cameraConfigs);
-
     if (isEditorView) {
         const editorSettings = rendering.getEditorPipelineSettings() as PipelineSettings | null;
         if (editorSettings) {
             cameraConfigs.settings = editorSettings;
-            setupPostProcessConfigs(pipelineConfigs,
-                cameraConfigs.settings, cameraConfigs);
+        } else {
+            cameraConfigs.settings = defaultSettings;
+        }
+    } else {
+        if (camera.pipelineSettings) {
+            cameraConfigs.settings = camera.pipelineSettings as PipelineSettings;
+        } else {
+            cameraConfigs.settings = defaultSettings;
         }
     }
+
+    setupPostProcessConfigs(pipelineConfigs, cameraConfigs.settings, cameraConfigs);
 
     // MSAA
     cameraConfigs.enableMSAA = cameraConfigs.settings.msaa.enabled
@@ -1059,6 +1062,7 @@ if (rendering) {
 
     class BuiltinPipelineBuilder implements rendering.PipelineBuilder {
         private readonly _pipelineEvent: PipelineEventProcessor = cclegacy.director.root.pipelineEvent as PipelineEventProcessor;
+        private readonly _forwardPass = new BuiltinForwardPassBuilder();
         private readonly _pipelinePasses = new Map<renderer.scene.Camera, rendering.PipelinePassBuilder[]>();
         // Internal cached resources
         private readonly _clearColor = new Color(0, 0, 0, 1);
