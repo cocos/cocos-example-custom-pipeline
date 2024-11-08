@@ -154,7 +154,6 @@ export class CameraConfigs {
     // PostProcess
     /** @en mutable */
     enablePostProcess = false;
-    enableBloom = false;
     enableColorGrading = false;
     enableFXAA = false;
     enableFSR = false;
@@ -165,9 +164,6 @@ function setupPostProcessConfigs(
     settings: PipelineSettings,
     cameraConfigs: CameraConfigs,
 ) {
-    cameraConfigs.enableBloom = settings.bloom.enabled
-        && !!settings.bloom.material;
-
     cameraConfigs.enableColorGrading = settings.colorGrading.enabled
         && !!settings.colorGrading.material
         && !!settings.colorGrading.colorGradingMap;
@@ -175,8 +171,7 @@ function setupPostProcessConfigs(
     cameraConfigs.enableFXAA = settings.fxaa.enabled
         && !!settings.fxaa.material;
 
-    cameraConfigs.enablePostProcess = (cameraConfigs.enableBloom
-        || cameraConfigs.enableColorGrading
+    cameraConfigs.enablePostProcess = (cameraConfigs.enableColorGrading
         || cameraConfigs.enableFXAA);
 }
 
@@ -1049,6 +1044,172 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
     private readonly _reflectionProbeClearColor = new Vec3(0, 0, 0);
 }
 
+export interface BloomPassConfigs {
+    enableBloom: boolean;
+}
+
+export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
+    getConfigOrder(): number {
+        return 0;
+    }
+    getRenderOrder(): number {
+        return 200;
+    }
+    resetCamera(cameraConfigs: BloomPassConfigs): void {
+        cameraConfigs.enableBloom = false;
+    }
+    configCamera(
+        camera: Readonly<renderer.scene.Camera>,
+        pipelineConfigs: Readonly<PipelineConfigs>,
+        cameraConfigs: Readonly<CameraConfigs> & BloomPassConfigs): void {
+        cameraConfigs.enableBloom = cameraConfigs.settings.bloom.enabled
+            && !!cameraConfigs.settings.bloom.material;
+        if (cameraConfigs.enableBloom) {
+            (cameraConfigs as CameraConfigs).enablePostProcess = true;
+        }
+    }
+    windowResize(
+        ppl: rendering.BasicPipeline,
+        pplConfigs: Readonly<PipelineConfigs>,
+        cameraConfigs: Readonly<CameraConfigs> & BloomPassConfigs,
+        window: renderer.RenderWindow,
+        camera: renderer.scene.Camera,
+        nativeWidth: number,
+        nativeHeight: number): void {
+        if (cameraConfigs.enableBloom) {
+            const id = window.renderWindowId;
+            let bloomWidth = cameraConfigs.width;
+            let bloomHeight = cameraConfigs.height;
+            for (let i = 0; i !== cameraConfigs.settings.bloom.iterations + 1; ++i) {
+                bloomWidth = Math.max(Math.floor(bloomWidth / 2), 1);
+                bloomHeight = Math.max(Math.floor(bloomHeight / 2), 1);
+                ppl.addRenderTarget(`BloomTex${id}_${i}`,
+                    cameraConfigs.radianceFormat, bloomWidth, bloomHeight);
+            }
+        }
+    }
+
+    setup(
+        ppl: rendering.BasicPipeline,
+        pplConfigs: Readonly<PipelineConfigs>,
+        cameraConfigs: Readonly<CameraConfigs & BloomPassConfigs>,
+        camera: renderer.scene.Camera,
+        context: PipelineContext,
+        prevRenderPass?: rendering.BasicRenderPassBuilder)
+        : rendering.BasicRenderPassBuilder | undefined {
+        if (cameraConfigs.enableBloom) {
+            const id = camera.window.renderWindowId;
+            assert(!!cameraConfigs.settings.bloom.material);
+            this._addKawaseDualFilterBloomPasses(
+                ppl, pplConfigs,
+                cameraConfigs.settings,
+                cameraConfigs.settings.bloom.material,
+                id, cameraConfigs.width, cameraConfigs.height, context.colorName);
+        }
+        return undefined;
+    }
+
+    private _addKawaseDualFilterBloomPasses(
+        ppl: rendering.BasicPipeline,
+        pplConfigs: Readonly<PipelineConfigs>,
+        settings: PipelineSettings,
+        bloomMaterial: Material,
+        id: number,
+        width: number,
+        height: number,
+        radianceName: string,
+    ): void {
+        const QueueHint = rendering.QueueHint;
+        // Based on Kawase Dual Filter Blur. Saves bandwidth on mobile devices.
+        // eslint-disable-next-line max-len
+        // https://community.arm.com/cfs-file/__key/communityserver-blogs-components-weblogfiles/00-00-00-20-66/siggraph2015_2D00_mmg_2D00_marius_2D00_slides.pdf
+
+        // Size: [prefilter(1/2), downsample(1/4), downsample(1/8), downsample(1/16), ...]
+        const iterations = settings.bloom.iterations;
+        const sizeCount = iterations + 1;
+        this._bloomWidths.length = sizeCount;
+        this._bloomHeights.length = sizeCount;
+        this._bloomWidths[0] = Math.max(Math.floor(width / 2), 1);
+        this._bloomHeights[0] = Math.max(Math.floor(height / 2), 1);
+        for (let i = 1; i !== sizeCount; ++i) {
+            this._bloomWidths[i] = Math.max(Math.floor(this._bloomWidths[i - 1] / 2), 1);
+            this._bloomHeights[i] = Math.max(Math.floor(this._bloomHeights[i - 1] / 2), 1);
+        }
+
+        // Bloom texture names
+        this._bloomTexNames.length = sizeCount;
+        for (let i = 0; i !== sizeCount; ++i) {
+            this._bloomTexNames[i] = `BloomTex${id}_${i}`;
+        }
+
+        // Setup bloom parameters
+        this._bloomParams.x = pplConfigs.useFloatOutput ? 1 : 0;
+        this._bloomParams.x = 0; // unused
+        this._bloomParams.z = settings.bloom.threshold;
+        this._bloomParams.w = settings.bloom.enableAlphaMask ? 1 : 0;
+
+        // Prefilter pass
+        const prefilterPass = ppl.addRenderPass(this._bloomWidths[0], this._bloomHeights[0], 'cc-bloom-prefilter');
+        prefilterPass.addRenderTarget(
+            this._bloomTexNames[0],
+            LoadOp.CLEAR,
+            StoreOp.STORE,
+            this._clearColorTransparentBlack,
+        );
+        prefilterPass.addTexture(radianceName, 'inputTexture');
+        prefilterPass.setVec4('g_platform', pplConfigs.platform);
+        prefilterPass.setVec4('bloomParams', this._bloomParams);
+        prefilterPass
+            .addQueue(QueueHint.OPAQUE)
+            .addFullscreenQuad(bloomMaterial, 0);
+
+        // Downsample passes
+        for (let i = 1; i !== sizeCount; ++i) {
+            const downPass = ppl.addRenderPass(this._bloomWidths[i], this._bloomHeights[i], 'cc-bloom-downsample');
+            downPass.addRenderTarget(this._bloomTexNames[i], LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
+            downPass.addTexture(this._bloomTexNames[i - 1], 'bloomTexture');
+            this._bloomTexSize.x = this._bloomWidths[i - 1];
+            this._bloomTexSize.y = this._bloomHeights[i - 1];
+            downPass.setVec4('g_platform', pplConfigs.platform);
+            downPass.setVec4('bloomTexSize', this._bloomTexSize);
+            downPass
+                .addQueue(QueueHint.OPAQUE)
+                .addFullscreenQuad(bloomMaterial, 1);
+        }
+
+        // Upsample passes
+        for (let i = iterations; i-- > 0;) {
+            const upPass = ppl.addRenderPass(this._bloomWidths[i], this._bloomHeights[i], 'cc-bloom-upsample');
+            upPass.addRenderTarget(this._bloomTexNames[i], LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
+            upPass.addTexture(this._bloomTexNames[i + 1], 'bloomTexture');
+            this._bloomTexSize.x = this._bloomWidths[i + 1];
+            this._bloomTexSize.y = this._bloomHeights[i + 1];
+            upPass.setVec4('g_platform', pplConfigs.platform);
+            upPass.setVec4('bloomTexSize', this._bloomTexSize);
+            upPass
+                .addQueue(QueueHint.OPAQUE)
+                .addFullscreenQuad(bloomMaterial, 2);
+        }
+
+        // Combine pass
+        const combinePass = ppl.addRenderPass(width, height, 'cc-bloom-combine');
+        combinePass.addRenderTarget(radianceName, LoadOp.LOAD, StoreOp.STORE);
+        combinePass.addTexture(this._bloomTexNames[0], 'bloomTexture');
+        combinePass.setVec4('g_platform', pplConfigs.platform);
+        combinePass.setVec4('bloomParams', this._bloomParams);
+        combinePass
+            .addQueue(QueueHint.BLEND)
+            .addFullscreenQuad(bloomMaterial, 3);
+    }
+    // Bloom
+    private readonly _clearColorTransparentBlack = new Color(0, 0, 0, 0);
+    private readonly _bloomParams = new Vec4(0, 0, 0, 0);
+    private readonly _bloomTexSize = new Vec4(0, 0, 0, 0);
+    private readonly _bloomWidths: Array<number> = [];
+    private readonly _bloomHeights: Array<number> = [];
+    private readonly _bloomTexNames: Array<string> = [];
+}
+
 if (rendering) {
 
     const { QueueHint, SceneFlags, ResourceFlags, ResourceResidency } = rendering;
@@ -1056,18 +1217,13 @@ if (rendering) {
     class BuiltinPipelineBuilder implements rendering.PipelineBuilder {
         private readonly _pipelineEvent: PipelineEventProcessor = cclegacy.director.root.pipelineEvent as PipelineEventProcessor;
         private readonly _forwardPass = new BuiltinForwardPassBuilder();
+        private readonly _bloomPass = new BuiltinBloomPassBuilder();
         // Internal cached resources
         private readonly _clearColor = new Color(0, 0, 0, 1);
         private readonly _clearColorTransparentBlack = new Color(0, 0, 0, 0);
         private readonly _viewport = new Viewport();
         private readonly _configs = new PipelineConfigs();
         private readonly _cameraConfigs = new CameraConfigs();
-        // Bloom
-        private readonly _bloomParams = new Vec4(0, 0, 0, 0);
-        private readonly _bloomTexSize = new Vec4(0, 0, 0, 0);
-        private readonly _bloomWidths: Array<number> = [];
-        private readonly _bloomHeights: Array<number> = [];
-        private readonly _bloomTexNames: Array<string> = [];
         // Color Grading
         private readonly _colorGradingTexSize = new Vec2(0, 0);
         // FXAA
@@ -1095,7 +1251,9 @@ if (rendering) {
                 passBuilders.length = 0;
             }
             passBuilders.push(this._forwardPass);
-
+            if (settings.bloom.enabled) {
+                passBuilders.push(this._bloomPass);
+            }
             return passBuilders;
         }
         private _setupCameraConfigs(
@@ -1179,16 +1337,6 @@ if (rendering) {
             // ---------------------------------------------------------
             // Post Process
             // ---------------------------------------------------------
-            // Bloom (Kawase Dual Filter)
-            if (this._cameraConfigs.enableBloom) {
-                let bloomWidth = width;
-                let bloomHeight = height;
-                for (let i = 0; i !== settings.bloom.iterations + 1; ++i) {
-                    bloomWidth = Math.max(Math.floor(bloomWidth / 2), 1);
-                    bloomHeight = Math.max(Math.floor(bloomHeight / 2), 1);
-                    ppl.addRenderTarget(`BloomTex${id}_${i}`, this._cameraConfigs.radianceFormat, bloomWidth, bloomHeight);
-                }
-            }
             // Color Grading
             if (this._cameraConfigs.enableColorGrading && settings.colorGrading.material && settings.colorGrading.colorGradingMap) {
                 settings.colorGrading.material.setProperty(
@@ -1331,13 +1479,6 @@ if (rendering) {
 
             // Forward Lighting
             if (this._cameraConfigs.enablePostProcess) { // Post Process
-                // Bloom
-                if (this._cameraConfigs.enableBloom) {
-                    assert(!!settings.bloom.material);
-                    this._addKawaseDualFilterBloomPasses(
-                        ppl, settings, settings.bloom.material,
-                        id, width, height, context.colorName);
-                }
                 // Tone Mapping and FXAA
                 if (this._cameraConfigs.enableFXAA) {
                     assert(!!settings.fxaa.material);
@@ -1480,97 +1621,6 @@ if (rendering) {
                 }
             }
             return pass;
-        }
-
-        private _addKawaseDualFilterBloomPasses(
-            ppl: rendering.BasicPipeline,
-            settings: PipelineSettings,
-            bloomMaterial: Material,
-            id: number,
-            width: number,
-            height: number,
-            radianceName: string,
-        ): void {
-            // Based on Kawase Dual Filter Blur. Saves bandwidth on mobile devices.
-            // eslint-disable-next-line max-len
-            // https://community.arm.com/cfs-file/__key/communityserver-blogs-components-weblogfiles/00-00-00-20-66/siggraph2015_2D00_mmg_2D00_marius_2D00_slides.pdf
-
-            // Size: [prefilter(1/2), downsample(1/4), downsample(1/8), downsample(1/16), ...]
-            const iterations = settings.bloom.iterations;
-            const sizeCount = iterations + 1;
-            this._bloomWidths.length = sizeCount;
-            this._bloomHeights.length = sizeCount;
-            this._bloomWidths[0] = Math.max(Math.floor(width / 2), 1);
-            this._bloomHeights[0] = Math.max(Math.floor(height / 2), 1);
-            for (let i = 1; i !== sizeCount; ++i) {
-                this._bloomWidths[i] = Math.max(Math.floor(this._bloomWidths[i - 1] / 2), 1);
-                this._bloomHeights[i] = Math.max(Math.floor(this._bloomHeights[i - 1] / 2), 1);
-            }
-
-            // Bloom texture names
-            this._bloomTexNames.length = sizeCount;
-            for (let i = 0; i !== sizeCount; ++i) {
-                this._bloomTexNames[i] = `BloomTex${id}_${i}`;
-            }
-
-            // Setup bloom parameters
-            this._bloomParams.x = this._configs.useFloatOutput ? 1 : 0;
-            this._bloomParams.x = 0; // unused
-            this._bloomParams.z = settings.bloom.threshold;
-            this._bloomParams.w = settings.bloom.enableAlphaMask ? 1 : 0;
-
-            // Prefilter pass
-            const prefilterPass = ppl.addRenderPass(this._bloomWidths[0], this._bloomHeights[0], 'cc-bloom-prefilter');
-            prefilterPass.addRenderTarget(
-                this._bloomTexNames[0],
-                LoadOp.CLEAR,
-                StoreOp.STORE,
-                this._clearColorTransparentBlack,
-            );
-            prefilterPass.addTexture(radianceName, 'inputTexture');
-            prefilterPass.setVec4('g_platform', this._configs.platform);
-            prefilterPass.setVec4('bloomParams', this._bloomParams);
-            prefilterPass
-                .addQueue(QueueHint.OPAQUE)
-                .addFullscreenQuad(bloomMaterial, 0);
-
-            // Downsample passes
-            for (let i = 1; i !== sizeCount; ++i) {
-                const downPass = ppl.addRenderPass(this._bloomWidths[i], this._bloomHeights[i], 'cc-bloom-downsample');
-                downPass.addRenderTarget(this._bloomTexNames[i], LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
-                downPass.addTexture(this._bloomTexNames[i - 1], 'bloomTexture');
-                this._bloomTexSize.x = this._bloomWidths[i - 1];
-                this._bloomTexSize.y = this._bloomHeights[i - 1];
-                downPass.setVec4('g_platform', this._configs.platform);
-                downPass.setVec4('bloomTexSize', this._bloomTexSize);
-                downPass
-                    .addQueue(QueueHint.OPAQUE)
-                    .addFullscreenQuad(bloomMaterial, 1);
-            }
-
-            // Upsample passes
-            for (let i = iterations; i-- > 0;) {
-                const upPass = ppl.addRenderPass(this._bloomWidths[i], this._bloomHeights[i], 'cc-bloom-upsample');
-                upPass.addRenderTarget(this._bloomTexNames[i], LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
-                upPass.addTexture(this._bloomTexNames[i + 1], 'bloomTexture');
-                this._bloomTexSize.x = this._bloomWidths[i + 1];
-                this._bloomTexSize.y = this._bloomHeights[i + 1];
-                upPass.setVec4('g_platform', this._configs.platform);
-                upPass.setVec4('bloomTexSize', this._bloomTexSize);
-                upPass
-                    .addQueue(QueueHint.OPAQUE)
-                    .addFullscreenQuad(bloomMaterial, 2);
-            }
-
-            // Combine pass
-            const combinePass = ppl.addRenderPass(width, height, 'cc-bloom-combine');
-            combinePass.addRenderTarget(radianceName, LoadOp.LOAD, StoreOp.STORE);
-            combinePass.addTexture(this._bloomTexNames[0], 'bloomTexture');
-            combinePass.setVec4('g_platform', this._configs.platform);
-            combinePass.setVec4('bloomParams', this._bloomParams);
-            combinePass
-                .addQueue(QueueHint.BLEND)
-                .addFullscreenQuad(bloomMaterial, 3);
         }
 
         private _addFsrPass(
