@@ -547,7 +547,7 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
 
         this._tryAddReflectionProbePasses(ppl, cameraConfigs, id, mainLight, camera.scene);
 
-        if (cameraConfigs.remainingPasses > 0) {
+        if (cameraConfigs.remainingPasses > 0 || cameraConfigs.enableShadingScale) {
             context.colorName = cameraConfigs.enableShadingScale
                 ? `ScaledRadiance0_${id}`
                 : `Radiance0_${id}`;
@@ -568,6 +568,10 @@ export class BuiltinForwardPassBuilder implements rendering.PipelinePassBuilder 
 
         if (!cameraConfigs.enableStoreSceneDepth) {
             context.depthStencilName = '';
+        }
+
+        if (cameraConfigs.remainingPasses === 0 && cameraConfigs.enableShadingScale) {
+            addCopyToScreenPass(ppl, pplConfigs, cameraConfigs, context.colorName);
         }
 
         return pass;
@@ -1403,19 +1407,6 @@ export class BuiltinFsrPassBuilder implements rendering.PipelinePassBuilder {
             ++cameraConfigs.remainingPasses;
         }
     }
-    windowResize(
-        ppl: rendering.BasicPipeline,
-        pplConfigs: Readonly<PipelineConfigs>,
-        cameraConfigs: CameraConfigs & FSRPassConfigs,
-        window: renderer.RenderWindow,
-        camera: renderer.scene.Camera,
-        nativeWidth: number,
-        nativeHeight: number): void {
-        if (cameraConfigs.enableFSR) {
-            ppl.addRenderTarget(`FsrColor${cameraConfigs.renderWindowId}`,
-                Format.RGBA8, nativeWidth, nativeHeight);
-        }
-    }
     setup(
         ppl: rendering.BasicPipeline,
         pplConfigs: Readonly<PipelineConfigs>,
@@ -1428,30 +1419,38 @@ export class BuiltinFsrPassBuilder implements rendering.PipelinePassBuilder {
             return prevRenderPass;
         }
         --cameraConfigs.remainingPasses;
-        assert(cameraConfigs.remainingPasses === 0);
 
-        return this._addFsrPass(ppl, pplConfigs, cameraConfigs.settings,
+        const inputColorName = context.colorName;
+        const outputColorName
+            = cameraConfigs.remainingPasses === 0
+                ? cameraConfigs.colorName
+                : getPingPongRenderTarget(context.colorName, 'UiColor', cameraConfigs.renderWindowId);
+        context.colorName = outputColorName;
+
+        return this._addFsrPass(ppl, pplConfigs, cameraConfigs,
+            cameraConfigs.settings,
             cameraConfigs.settings.fsr.material,
             cameraConfigs.renderWindowId,
             cameraConfigs.width,
             cameraConfigs.height,
-            context.colorName,
+            inputColorName,
             cameraConfigs.nativeWidth,
             cameraConfigs.nativeHeight,
-            cameraConfigs.colorName);
+            outputColorName);
     }
     private _addFsrPass(
         ppl: rendering.BasicPipeline,
         pplConfigs: Readonly<PipelineConfigs>,
+        cameraConfigs: CameraConfigs & FSRPassConfigs,
         settings: PipelineSettings,
         fsrMaterial: Material,
         id: number,
         width: number,
         height: number,
-        ldrColorName: string,
+        inputColorName: string,
         nativeWidth: number,
         nativeHeight: number,
-        colorName: string,
+        outputColorName: string,
     ): rendering.BasicRenderPassBuilder {
         this._fsrTexSize.x = width;
         this._fsrTexSize.y = height;
@@ -1459,11 +1458,13 @@ export class BuiltinFsrPassBuilder implements rendering.PipelinePassBuilder {
         this._fsrTexSize.w = nativeHeight;
         this._fsrParams.x = clamp(1.0 - settings.fsr.sharpness, 0.02, 0.98);
 
-        const fsrColorName = `FsrColor${id}`;
+        const uiColorPrefix = 'UiColor';
+
+        const fsrColorName = getPingPongRenderTarget(outputColorName, uiColorPrefix, id);
 
         const easuPass = ppl.addRenderPass(nativeWidth, nativeHeight, 'cc-fsr-easu');
         easuPass.addRenderTarget(fsrColorName, LoadOp.CLEAR, StoreOp.STORE, sClearColorTransparentBlack);
-        easuPass.addTexture(ldrColorName, 'outputResultMap');
+        easuPass.addTexture(inputColorName, 'outputResultMap');
         easuPass.setVec4('g_platform', pplConfigs.platform);
         easuPass.setVec4('fsrTexSize', this._fsrTexSize);
         easuPass
@@ -1471,7 +1472,7 @@ export class BuiltinFsrPassBuilder implements rendering.PipelinePassBuilder {
             .addFullscreenQuad(fsrMaterial, 0);
 
         const rcasPass = ppl.addRenderPass(nativeWidth, nativeHeight, 'cc-fsr-rcas');
-        rcasPass.addRenderTarget(colorName, LoadOp.CLEAR, StoreOp.STORE, sClearColorTransparentBlack);
+        rcasPass.addRenderTarget(outputColorName, LoadOp.CLEAR, StoreOp.STORE, sClearColorTransparentBlack);
         rcasPass.addTexture(fsrColorName, 'outputResultMap');
         rcasPass.setVec4('g_platform', pplConfigs.platform);
         rcasPass.setVec4('fsrTexSize', this._fsrTexSize);
@@ -1519,7 +1520,7 @@ export class BuiltinUiPassBuilder implements rendering.PipelinePassBuilder {
 
 if (rendering) {
 
-    const { QueueHint, SceneFlags, ResourceFlags, ResourceResidency } = rendering;
+    const { QueueHint, SceneFlags } = rendering;
 
     class BuiltinPipelineBuilder implements rendering.PipelineBuilder {
         private readonly _pipelineEvent: PipelineEventProcessor = cclegacy.director.root.pipelineEvent as PipelineEventProcessor;
@@ -1527,6 +1528,7 @@ if (rendering) {
         private readonly _bloomPass = new BuiltinBloomPassBuilder();
         private readonly _toneMappingPass = new BuiltinToneMappingPassBuilder();
         private readonly _fxaaPass = new BuiltinFXAAPassBuilder();
+        private readonly _fsrPass = new BuiltinFsrPassBuilder();
         // Internal cached resources
         private readonly _clearColor = new Color(0, 0, 0, 1);
         private readonly _viewport = new Viewport();
@@ -1564,23 +1566,30 @@ if (rendering) {
 
         private _preparePipelinePasses(cameraConfigs: CameraConfigs): void {
             const passBuilders = this._passBuilders;
+            passBuilders.length = 0;
 
             const settings = cameraConfigs.settings as PipelineSettings2;
             if (settings._passes) {
-                passBuilders.length = settings._passes.length;
-                for (let i = 0; i < settings._passes.length; ++i) {
-                    passBuilders[i] = settings._passes[i];
+                for (const pass of settings._passes) {
+                    passBuilders.push(pass);
                 }
-            } else {
-                passBuilders.length = 0;
+                assert(passBuilders.length === settings._passes.length);
             }
+
             passBuilders.push(this._forwardPass);
+
             if (settings.bloom.enabled) {
                 passBuilders.push(this._bloomPass);
             }
+
             passBuilders.push(this._toneMappingPass);
+
             if (settings.fxaa.enabled) {
                 passBuilders.push(this._fxaaPass);
+            }
+
+            if (settings.fsr.enabled) {
+                passBuilders.push(this._fsrPass);
             }
         }
 
@@ -1697,14 +1706,14 @@ if (rendering) {
                 ppl.addRenderTarget(`LdrColor0_${id}`, Format.RGBA8, width, height);
                 ppl.addRenderTarget(`LdrColor1_${id}`, Format.RGBA8, width, height);
             }
+            ppl.addRenderTarget(`UiColor0_${id}`, Format.RGBA8, nativeWidth, nativeHeight);
+            ppl.addRenderTarget(`UiColor1_${id}`, Format.RGBA8, nativeWidth, nativeHeight);
 
             for (const builder of this._passBuilders) {
                 if (builder.windowResize) {
                     builder.windowResize(ppl, this._configs, this._cameraConfigs, window, camera, nativeWidth, nativeHeight);
                 }
             }
-
-            this._cameraConfigs.remainingPasses = 0;
         }
         setup(cameras: renderer.scene.Camera[], ppl: rendering.BasicPipeline): void {
             // TODO(zhouzhenglong): Make default effect asset loading earlier and remove _initMaterials
