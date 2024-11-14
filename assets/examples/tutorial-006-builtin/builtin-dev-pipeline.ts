@@ -1300,19 +1300,6 @@ export class BuiltinFXAAPassBuilder implements rendering.PipelinePassBuilder {
             ++cameraConfigs.remainingPasses;
         }
     }
-    windowResize(
-        ppl: rendering.BasicPipeline,
-        pplConfigs: Readonly<PipelineConfigs>,
-        cameraConfigs: CameraConfigs & FXAAPassConfigs,
-        window: renderer.RenderWindow,
-        camera: renderer.scene.Camera,
-        nativeWidth: number,
-        nativeHeight: number): void {
-        if (cameraConfigs.enableFXAA) {
-            ppl.addRenderTarget(`AaColor${cameraConfigs.renderWindowId}`,
-                Format.RGBA8, cameraConfigs.width, cameraConfigs.height);
-        }
-    }
     setup(
         ppl: rendering.BasicPipeline,
         pplConfigs: Readonly<PipelineConfigs>,
@@ -1328,7 +1315,10 @@ export class BuiltinFXAAPassBuilder implements rendering.PipelinePassBuilder {
         assert(cameraConfigs.remainingPasses >= 0);
 
         const id = cameraConfigs.renderWindowId;
-        const ldrColorName = `AaColor${id}`;
+        const ldrColorPrefix = cameraConfigs.enableShadingScale
+            ? `ScaledLdrColor`
+            : `LdrColor`;
+        const ldrColorName = getPingPongRenderTarget(context.colorName, ldrColorPrefix, id);
 
         if (cameraConfigs.remainingPasses === 0) {
             if (cameraConfigs.enableShadingScale) {
@@ -1350,13 +1340,14 @@ export class BuiltinFXAAPassBuilder implements rendering.PipelinePassBuilder {
                     cameraConfigs.colorName);
             }
         } else {
+            const inputColorName = context.colorName;
+            context.colorName = ldrColorName;
             const lastPass = this._addFxaaPass(ppl, pplConfigs,
                 cameraConfigs.settings.fxaa.material,
                 cameraConfigs.width,
                 cameraConfigs.height,
-                ldrColorName,
-                context.colorName);
-            context.colorName = ldrColorName;
+                inputColorName,
+                ldrColorName);
             return lastPass;
         }
     }
@@ -1535,6 +1526,7 @@ if (rendering) {
         private readonly _forwardPass = new BuiltinForwardPassBuilder();
         private readonly _bloomPass = new BuiltinBloomPassBuilder();
         private readonly _toneMappingPass = new BuiltinToneMappingPassBuilder();
+        private readonly _fxaaPass = new BuiltinFXAAPassBuilder();
         // Internal cached resources
         private readonly _clearColor = new Color(0, 0, 0, 1);
         private readonly _viewport = new Viewport();
@@ -1587,6 +1579,9 @@ if (rendering) {
                 passBuilders.push(this._bloomPass);
             }
             passBuilders.push(this._toneMappingPass);
+            if (settings.fxaa.enabled) {
+                passBuilders.push(this._fxaaPass);
+            }
         }
 
         private _setupBuiltinCameraConfigs(
