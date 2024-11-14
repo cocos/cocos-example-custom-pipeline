@@ -281,7 +281,7 @@
     "__prefab": null,
     "_settings": {
       "msaa": {
-        "enabled": true,
+        "enabled": false,
         "sampleCount": 4
       },
       "enableShadingScale": false,

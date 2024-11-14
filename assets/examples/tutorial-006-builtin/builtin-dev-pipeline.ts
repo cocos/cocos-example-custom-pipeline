@@ -1215,16 +1215,17 @@ export class BuiltinToneMappingPassBuilder implements rendering.PipelinePassBuil
                 context.colorName, cameraConfigs.colorName);
         } else {
             const id = cameraConfigs.renderWindowId;
-            const ldrColorName = cameraConfigs.enableShadingScale
-                ? `ScaledLdrColor${id}`
-                : `LdrColor${id}`;
+            const ldrColorPrefix = cameraConfigs.enableShadingScale
+                ? `ScaledLdrColor`
+                : `LdrColor`;
 
-            const lastPass = this._addCopyAndTonemapPass(ppl, pplConfigs, cameraConfigs,
-                cameraConfigs.width, cameraConfigs.height,
-                context.colorName, ldrColorName);
+            const ldrColorName = getPingPongRenderTarget(context.colorName, ldrColorPrefix, id);
+            const radianceName = context.colorName;
             context.colorName = ldrColorName;
 
-            return lastPass;
+            return this._addCopyAndTonemapPass(ppl, pplConfigs, cameraConfigs,
+                cameraConfigs.width, cameraConfigs.height,
+                radianceName, ldrColorName);
         }
     }
     private _addCopyAndTonemapPass(
@@ -1533,6 +1534,7 @@ if (rendering) {
         private readonly _pipelineEvent: PipelineEventProcessor = cclegacy.director.root.pipelineEvent as PipelineEventProcessor;
         private readonly _forwardPass = new BuiltinForwardPassBuilder();
         private readonly _bloomPass = new BuiltinBloomPassBuilder();
+        private readonly _toneMappingPass = new BuiltinToneMappingPassBuilder();
         // Internal cached resources
         private readonly _clearColor = new Color(0, 0, 0, 1);
         private readonly _viewport = new Viewport();
@@ -1584,6 +1586,7 @@ if (rendering) {
             if (settings.bloom.enabled) {
                 passBuilders.push(this._bloomPass);
             }
+            passBuilders.push(this._toneMappingPass);
         }
 
         private _setupBuiltinCameraConfigs(
