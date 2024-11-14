@@ -77,7 +77,7 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
     @property
     _minRange = 0;
     @property
-    _maxRange = 50;
+    _maxRange = 2;
     @property
     _blurRadius = 1;
     @property
