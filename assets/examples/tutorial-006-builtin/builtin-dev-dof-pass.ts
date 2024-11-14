@@ -196,15 +196,15 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
     configCamera(
         camera: Readonly<renderer.scene.Camera>,
         pplConfigs: Readonly<PipelineConfigs>,
-        cameraConfigs: Readonly<CameraConfigs> & DofPassConfigs): void {
+        cameraConfigs: CameraConfigs & DofPassConfigs): void {
         cameraConfigs.enableDof = pplConfigs.supportDepthSample
             && this._enableDof
             && !!this._material;
 
         if (cameraConfigs.enableDof) {
             // Output scene depth, this is allowed but has performance impact
-            (cameraConfigs as CameraConfigs).enableStoreSceneDepth = true;
-            (cameraConfigs as CameraConfigs).enablePostProcess = true;
+            cameraConfigs.enableStoreSceneDepth = true;
+            ++cameraConfigs.remainingPasses;
         }
     }
     windowResize(
@@ -229,13 +229,15 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
     setup(
         ppl: rendering.BasicPipeline,
         pplConfigs: Readonly<PipelineConfigs>,
-        cameraConfigs: Readonly<CameraConfigs & DofPassConfigs>,
+        cameraConfigs: CameraConfigs & Readonly<DofPassConfigs>,
         camera: renderer.scene.Camera,
         context: PipelineContext,
         prevRenderPass?: rendering.BasicRenderPassBuilder): rendering.BasicRenderPassBuilder | undefined {
         if (!cameraConfigs.enableDof) {
             return undefined;
         }
+        --cameraConfigs.remainingPasses;
+
         const id = cameraConfigs.renderWindowId;
 
         assert(!!this._material);
