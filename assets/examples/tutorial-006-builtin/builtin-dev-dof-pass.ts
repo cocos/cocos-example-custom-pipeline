@@ -39,6 +39,7 @@ import {
 
 import {
     CameraConfigs,
+    getPingPongRenderTarget,
     PipelineConfigs,
     PipelineContext,
 } from './builtin-dev-pipeline';
@@ -217,13 +218,10 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
         nativeHeight: number): void {
         const id = window.renderWindowId;
         if (cameraConfigs.enableDof) {
-            const halfWidth = Math.max(Math.floor(cameraConfigs.width / 2), 1);
-            const halfHeight = Math.max(Math.floor(cameraConfigs.height / 2), 1);
-            // `DofCoc${id}` texture will reuse ldrColorName
-            ppl.addRenderTarget(`DofRadiance${id}`, cameraConfigs.radianceFormat, cameraConfigs.width, cameraConfigs.height);
-            ppl.addRenderTarget(`DofPrefilter${id}`, cameraConfigs.radianceFormat, halfWidth, halfHeight);
-            ppl.addRenderTarget(`DofBokeh${id}`, cameraConfigs.radianceFormat, halfWidth, halfHeight);
-            ppl.addRenderTarget(`DofFilter${id}`, cameraConfigs.radianceFormat, halfWidth, halfHeight);
+            ppl.addRenderTarget(`DofRadiance${id}`,
+                cameraConfigs.radianceFormat,
+                cameraConfigs.width,
+                cameraConfigs.height);
         }
     }
     setup(
@@ -234,41 +232,45 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
         context: PipelineContext,
         prevRenderPass?: rendering.BasicRenderPassBuilder): rendering.BasicRenderPassBuilder | undefined {
         if (!cameraConfigs.enableDof) {
-            return undefined;
+            return prevRenderPass;
         }
         --cameraConfigs.remainingPasses;
 
-        const id = cameraConfigs.renderWindowId;
-
-        assert(!!this._material);
-        const prevColorName = context.colorName;
-        const prevDepthStencilName = context.depthStencilName;
-
-        context.colorName = `DofRadiance${id}`;
-
-        const ldrColorName = cameraConfigs.enableShadingScale
-            ? `ScaledLdrColor${id}`
-            : `LdrColor${id}`;
-
-        this._addDepthOfFieldPasses(ppl, pplConfigs, this._material,
-            camera, cameraConfigs.width, cameraConfigs.height,
-            prevColorName, prevDepthStencilName,
-            context.colorName, ldrColorName);
-
-        return undefined;
+        if (cameraConfigs.remainingPasses === 0) {
+            return this._addDepthOfFieldPasses(ppl, pplConfigs,
+                cameraConfigs, this._material,
+                camera, cameraConfigs.width, cameraConfigs.height,
+                context.colorName,
+                context.depthStencilName,
+                cameraConfigs.colorName);
+        } else {
+            const prefix = cameraConfigs.enableShadingScale
+                ? `ScaledRadiance`
+                : `Radiance`;
+            const outputRadianceName = getPingPongRenderTarget(
+                context.colorName, prefix, cameraConfigs.renderWindowId);
+            const inputRadianceName = context.colorName;
+            context.colorName = outputRadianceName;
+            return this._addDepthOfFieldPasses(ppl, pplConfigs,
+                cameraConfigs, this._material,
+                camera, cameraConfigs.width, cameraConfigs.height,
+                inputRadianceName,
+                context.depthStencilName,
+                outputRadianceName);
+        }
     }
     private _addDepthOfFieldPasses(
         ppl: rendering.BasicPipeline,
         pplConfigs: Readonly<PipelineConfigs>,
+        cameraConfigs: CameraConfigs & Readonly<DofPassConfigs>,
         dofMaterial: Material,
         camera: renderer.scene.Camera,
         width: number,
         height: number,
-        dofRadianceName: string,
-        depthStencil: string,
-        radianceName: string,
-        ldrColorName: string,
-    ): void {
+        inputRadiance: string,
+        inputDepthStencil: string,
+        outputRadianceName: string,
+    ): rendering.BasicRenderPassBuilder {
         this._cocParams.x = this._minRange;
         this._cocParams.y = this._maxRange;// camera.farClip;// this._focusRange;
         this._cocParams.z = this._blurRadius;
@@ -280,12 +282,14 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
         this._cocTexSize.y = 1.0 / height;
         this._cocTexSize.z = width;
         this._cocTexSize.w = height;
-        const blurName = ldrColorName;
+
+        const id = cameraConfigs.renderWindowId;
+        const tempRadiance = `DofRadiance${id}`;
 
         // Blur Pass
         const blurPass = ppl.addRenderPass(width, height, 'cc-dof-blur');
-        blurPass.addRenderTarget(blurName, LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
-        blurPass.addTexture(dofRadianceName, 'screenTex');
+        blurPass.addRenderTarget(tempRadiance, LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
+        blurPass.addTexture(inputRadiance, 'screenTex');
         blurPass.setVec4('g_platform', pplConfigs.platform);
         blurPass.setVec4('blurParams', this._cocParams);
         blurPass.setVec4('mainTexTexelSize', this._cocTexSize);
@@ -294,10 +298,10 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
             .addCameraQuad(camera, dofMaterial, 0); // addCameraQuad will set camera related UBOs
         // coc pass
         const cocPass = ppl.addRenderPass(width, height, 'cc-dof-coc');
-        cocPass.addRenderTarget(radianceName, LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
-        cocPass.addTexture(blurName, 'colorTex');
-        cocPass.addTexture(depthStencil, "DepthTex");
-        cocPass.addTexture(dofRadianceName, "screenTex");
+        cocPass.addRenderTarget(outputRadianceName, LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
+        cocPass.addTexture(tempRadiance, 'colorTex');
+        cocPass.addTexture(inputDepthStencil, "DepthTex");
+        cocPass.addTexture(inputRadiance, "screenTex");
         cocPass.setVec4('g_platform', pplConfigs.platform);
         cocPass.setMat4('proj', camera.matProj);
         cocPass.setMat4('invProj', camera.matProjInv);
@@ -307,6 +311,8 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
         cocPass
             .addQueue(rendering.QueueHint.OPAQUE)
             .addCameraQuad(camera, dofMaterial, 1);
+
+        return cocPass;
     }
 
     // Runtime members
