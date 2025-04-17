@@ -1,10 +1,10 @@
 {
-  "ver": "2.3.13",
+  "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
   "uuid": "aade09ee-8f9d-413c-a9e8-8c686ea5e160",
   "files": [
-    "__original-animation-0.cconb"
+    "__original-animation-0.bin"
   ],
   "subMetas": {
     "ef5e1": {
@@ -31,10 +31,10 @@
       "displayName": "",
       "id": "73b7f",
       "name": "Take 001.animation",
-      "ver": "1.0.17",
+      "ver": "1.0.18",
       "imported": true,
       "files": [
-        ".cconb"
+        ".bin"
       ],
       "subMetas": {},
       "userData": {

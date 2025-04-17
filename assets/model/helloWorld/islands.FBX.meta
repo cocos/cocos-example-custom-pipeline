@@ -1,5 +1,5 @@
 {
-  "ver": "2.3.13",
+  "ver": "2.3.14",
   "importer": "fbx",
   "imported": true,
   "uuid": "0ab3142a-6968-4073-95af-026bc3b23623",
@@ -74,7 +74,7 @@
       "subMetas": {},
       "userData": {
         "gltfIndex": 2,
-        "triangleCount": 586
+        "triangleCount": 587
       }
     },
     "ef86b": {
@@ -110,7 +110,7 @@
       "subMetas": {},
       "userData": {
         "gltfIndex": 4,
-        "triangleCount": 436
+        "triangleCount": 437
       }
     },
     "754a2": {
@@ -128,7 +128,7 @@
       "subMetas": {},
       "userData": {
         "gltfIndex": 5,
-        "triangleCount": 586
+        "triangleCount": 587
       }
     },
     "1332c": {
@@ -146,7 +146,7 @@
       "subMetas": {},
       "userData": {
         "gltfIndex": 7,
-        "triangleCount": 586
+        "triangleCount": 587
       }
     },
     "4d16f": {
