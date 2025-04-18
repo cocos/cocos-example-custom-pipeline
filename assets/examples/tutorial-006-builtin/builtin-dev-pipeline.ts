@@ -73,7 +73,7 @@ function getCsmMainLightViewport(
     vp.height = Math.max(1, vp.height);
 }
 
-export const enableGlobalUniform = true;
+export const enableGlobalUniform = false;
 
 export class PipelineConfigs {
     isWeb = false;
