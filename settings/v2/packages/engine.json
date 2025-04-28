@@ -49,6 +49,9 @@
           "2d": {
             "_value": true
           },
+          "sorting-2d": {
+            "_value": false
+          },
           "xr": {
             "_value": false
           },
