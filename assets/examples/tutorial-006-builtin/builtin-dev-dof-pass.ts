@@ -39,7 +39,6 @@ import {
 
 import {
     CameraConfigs,
-    enableGlobalUniform,
     getPingPongRenderTarget,
     PipelineConfigs,
     PipelineContext,
@@ -289,9 +288,6 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
         const blurPass = ppl.addRenderPass(width, height, 'cc-dof-blur');
         blurPass.addRenderTarget(tempRadiance, LoadOp.CLEAR, StoreOp.STORE, this._clearColorTransparentBlack);
         blurPass.addTexture(inputRadiance, 'screenTex');
-        if (!enableGlobalUniform) {
-            blurPass.setVec4('g_platform', pplConfigs.platform);
-        }
         blurPass.setVec4('blurParams', this._cocParams);
         blurPass.setVec4('mainTexTexelSize', this._cocTexSize);
         blurPass
@@ -303,9 +299,6 @@ export class BuiltinDevDepthOfFieldPass extends BuiltinDevPipelinePassBuilder
         cocPass.addTexture(tempRadiance, 'colorTex');
         cocPass.addTexture(inputDepthStencil, "DepthTex");
         cocPass.addTexture(inputRadiance, "screenTex");
-        if (!enableGlobalUniform) {
-            cocPass.setVec4('g_platform', pplConfigs.platform);
-        }
         cocPass.setMat4('proj', camera.matProj);
         cocPass.setMat4('invProj', camera.matProjInv);
         cocPass.setMat4('viewMatInv', camera.node.worldMatrix);
