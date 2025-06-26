@@ -28,7 +28,7 @@
  * ========================= !DO NOT CHANGE THE FOLLOWING SECTION MANUALLY! =========================
  */
 /* eslint-disable max-len */
-import { Material, Texture2D, Vec3, gfx } from 'cc';
+import { Material, Texture2D, ccenum, gfx } from 'cc';
 
 const { SampleCount } = gfx;
 
@@ -52,6 +52,15 @@ export function fillRequiredMSAA(value: MSAA): void {
     if (value.sampleCount === undefined) {
         value.sampleCount = SampleCount.X4;
     }
+}
+
+export interface ForwardPassConfigs {
+    enableMainLightShadowMap: boolean; /* false */
+    enableMainLightPlanarShadowMap: boolean; /* false */
+    enablePlanarReflectionProbe: boolean; /* false */
+    enableMSAA: boolean; /* false */
+    enableSingleForwardPass: boolean; /* false */
+    [name: string]: unknown;
 }
 
 export interface HBAO {
@@ -96,9 +105,18 @@ export function fillRequiredHBAO(value: HBAO): void {
     }
 }
 
+export enum BloomType {
+    KawaseDualFilter,
+    MipmapFilter,
+}
+ccenum(BloomType);
+
 export interface Bloom {
     enabled: boolean; /* false */
+    type: BloomType; /* BloomType.KawaseDualFilter */
     /* refcount */ material: Material | null;
+    /* refcount */ kawaseFilterMaterial: Material | null;
+    /* refcount */ mipmapFilterMaterial: Material | null;
     enableAlphaMask: boolean; /* false */
     iterations: number; /* 3 */
     threshold: number; /* 0.8 */
@@ -109,7 +127,10 @@ export interface Bloom {
 export function makeBloom(): Bloom {
     return {
         enabled: false,
+        type: BloomType.KawaseDualFilter,
         material: null,
+        kawaseFilterMaterial: null,
+        mipmapFilterMaterial: null,
         enableAlphaMask: false,
         iterations: 3,
         threshold: 0.8,
@@ -121,8 +142,17 @@ export function fillRequiredBloom(value: Bloom): void {
     if (value.enabled === undefined) {
         value.enabled = false;
     }
+    if (value.type === undefined) {
+        value.type = BloomType.KawaseDualFilter;
+    }
     if (value.material === undefined) {
         value.material = null;
+    }
+    if (value.kawaseFilterMaterial === undefined) {
+        value.kawaseFilterMaterial = value.material || null;
+    }
+    if (value.mipmapFilterMaterial === undefined) {
+        value.mipmapFilterMaterial = null;
     }
     if (value.enableAlphaMask === undefined) {
         value.enableAlphaMask = false;
