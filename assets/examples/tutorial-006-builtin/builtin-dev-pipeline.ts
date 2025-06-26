@@ -1041,7 +1041,7 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
             }
         } else if (bloom.type === BloomType.MipmapFilter) {
             const iterations = bloom.iterations;
-            for (let i = 0; i !== bloom.iterations + 1; ++i) {
+            for (let i = 0; i !== iterations + 1; ++i) {
                 // DownSample
                 if (i < iterations) {
                     const scale = Math.pow(0.5, i + 2);
@@ -1064,7 +1064,8 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
                 }
             }
             this._originalColorDesc = this.createTexture(ppl, `OriginalColor${id}`, width, height, format);
-            this._prefilterTexDesc = this.createTexture(ppl, `PrefilterColor${id}`, width * 0.5, height * 0.5, format);
+            this._prefilterTexDesc = this.createTexture(ppl, `PrefilterColor${id}`,
+                downSize(width, 0.5), downSize(height, 0.5), format);
         }
     }
     private createTexture(
@@ -1254,19 +1255,19 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
         this._bloomParams.z = settings.bloom.threshold;
         this._bloomParams.w = settings.bloom.intensity;
         const prefilterInfo = this._prefilterTexDesc;
-        ppl.addCopyPass([new rendering.CopyPair(radianceName, this._originalColorDesc.name)]);
+
         // Prefilter pass
         let currSamplePass = this._addPass(
             ppl,
             prefilterInfo.width,
             prefilterInfo.height,
-            'cc-bloom-prefilter',
+            'cc-bloom-mipmap-prefilter',
             prefilterInfo.name,
             bloomMaterial,
             0,
         );
         currSamplePass.addTexture(radianceName, 'mainTexture');
-        currSamplePass.setVec4('cc_debug_view_mode', this._bloomParams);
+        currSamplePass.setVec4('bloomParams', this._bloomParams);
 
         const downSampleInfos = this._bloomDownSampleTexDescs;
         // Downsample passes
@@ -1280,13 +1281,13 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
                 ppl,
                 currInfo.width,
                 currInfo.height,
-                'cc-bloom-downsample',
+                'cc-bloom-mipmap-downsample',
                 currInfo.name,
                 bloomMaterial,
                 1,
             );
             currSamplePass.addTexture(samplerSrcName, 'mainTexture');
-            currSamplePass.setVec4('cc_debug_view_mode', this._bloomTexSize);
+            currSamplePass.setVec4('bloomParams', this._bloomTexSize);
         }
         const lastIndex = downSampleInfos.length - 1;
         const upSampleInfos = this._bloomUpSampleTexDescs;
@@ -1301,14 +1302,14 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
                 ppl,
                 currInfo.width,
                 currInfo.height,
-                'cc-bloom-upsample',
+                'cc-bloom-mipmap-upsample',
                 currInfo.name,
                 bloomMaterial,
                 2,
             );
             currSamplePass.addTexture(sampleSrcName, 'mainTexture');
             currSamplePass.addTexture(downSampleInfos[lastIndex - 1 - i].name, 'downsampleTexture');
-            currSamplePass.setVec4('cc_debug_view_mode', this._bloomTexSize);
+            currSamplePass.setVec4('bloomParams', this._bloomTexSize);
         }
 
         // Combine pass
@@ -1316,14 +1317,14 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
             ppl,
             width,
             height,
-            'cc-bloom-combine',
+            'cc-bloom-mipmap-combine',
             radianceName,
             bloomMaterial,
             3,
+            LoadOp.LOAD,
         );
-        combinePass.addTexture(this._originalColorDesc.name, 'mainTexture');
         combinePass.addTexture(upSampleInfos[upSampleInfos.length - 1].name, 'bloomTexture');
-        combinePass.setVec4('cc_debug_view_mode', this._bloomParams);
+        combinePass.setVec4('bloomParams', this._bloomParams);
         if (cameraConfigs.remainingPasses === 0) {
             return addCopyToScreenPass(ppl, pplConfigs, cameraConfigs, radianceName);
         } else {
