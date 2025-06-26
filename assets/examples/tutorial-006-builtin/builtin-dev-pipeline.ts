@@ -1205,7 +1205,7 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
         }
 
         // Combine pass
-        this._bloomParams.w = settings.bloom.intensity / 2.3; // Divide by 2.3 to match the original bloom intensity
+        this._bloomParams.w = settings.bloom.intensity;
         const combinePass = ppl.addRenderPass(width, height, 'cc-bloom-combine');
         combinePass.addRenderTarget(radianceName, LoadOp.LOAD, StoreOp.STORE);
         combinePass.addTexture(this._bloomTexNames[0], 'bloomTexture');

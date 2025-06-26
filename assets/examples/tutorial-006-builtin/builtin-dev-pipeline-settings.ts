@@ -30,6 +30,7 @@ import {
 import { EDITOR } from 'cc/env';
 
 import {
+    BloomType,
     fillRequiredPipelineSettings, makePipelineSettings, PipelineSettings,
 } from './builtin-pipeline-types';
 
@@ -186,21 +187,53 @@ export class BuiltinDevPipelineSettings extends Component {
         return this._settings.bloom.enabled;
     }
 
+    @type(BloomType)
     @property({
         group: { id: 'Bloom', name: 'Bloom (PostProcessing)', style: 'section' },
-        type: Material,
     })
-    set bloomMaterial(value: Material) {
-        if (this._settings.bloom.material === value) {
-            return;
-        }
-        this._settings.bloom.material = value;
+    set bloomType(value: BloomType) {
+        this._settings.bloom.type = value;
         if (EDITOR) {
             this._tryEnableEditorPreview();
         }
     }
-    get bloomMaterial(): Material {
-        return this._settings.bloom.material!;
+
+    get bloomType(): BloomType {
+        return this._settings.bloom.type;
+    }
+
+    @property({
+        group: { id: 'Bloom', name: 'Bloom (PostProcessing)', style: 'section' },
+        type: Material,
+    })
+    set kawaseBloomMaterial(value: Material) {
+        if (this._settings.bloom.kawaseFilterMaterial === value) {
+            return;
+        }
+        this._settings.bloom.kawaseFilterMaterial = value;
+        if (EDITOR) {
+            this._tryEnableEditorPreview();
+        }
+    }
+    get kawaseBloomMaterial(): Material {
+        return this._settings.bloom.kawaseFilterMaterial!;
+    }
+
+    @property({
+        group: { id: 'Bloom', name: 'Bloom (PostProcessing)', style: 'section' },
+        type: Material,
+    })
+    set mipmapBloomMaterial(value: Material) {
+        if (this._settings.bloom.mipmapFilterMaterial === value) {
+            return;
+        }
+        this._settings.bloom.mipmapFilterMaterial = value;
+        if (EDITOR) {
+            this._tryEnableEditorPreview();
+        }
+    }
+    get mipmapBloomMaterial(): Material {
+        return this._settings.bloom.mipmapFilterMaterial!;
     }
 
     @property({
@@ -248,8 +281,15 @@ export class BuiltinDevPipelineSettings extends Component {
         return this._settings.bloom.threshold;
     }
 
+    @type(CCFloat)
+    @property({
+        group: { id: 'Bloom', name: 'Bloom (PostProcessing)', style: 'section' },
+    })
     set bloomIntensity(value: number) {
         this._settings.bloom.intensity = value;
+        if (EDITOR) {
+            this._tryEnableEditorPreview();
+        }
     }
     get bloomIntensity(): number {
         return this._settings.bloom.intensity;
