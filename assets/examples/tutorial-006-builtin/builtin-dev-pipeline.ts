@@ -31,6 +31,7 @@ import {
 import { DEBUG, EDITOR } from 'cc/env';
 
 import {
+    BloomType,
     makePipelineSettings,
     PipelineSettings,
 } from './builtin-pipeline-types';
@@ -985,6 +986,16 @@ export interface BloomPassConfigs {
     enableBloom: boolean;
 }
 
+function downSize(size: number, scale: number): number {
+    return Math.max(Math.floor(size * scale), 1);
+}
+
+interface RenderTextureDesc {
+    name: string;
+    width: number;
+    height: number;
+}
+
 export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
     getConfigOrder(): number {
         return 0;
@@ -996,9 +1007,13 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
         camera: Readonly<renderer.scene.Camera>,
         pipelineConfigs: Readonly<PipelineConfigs>,
         cameraConfigs: CameraConfigs & BloomPassConfigs): void {
-        cameraConfigs.enableBloom
-            = cameraConfigs.settings.bloom.enabled
-            && !!cameraConfigs.settings.bloom.material;
+        const { bloom } = cameraConfigs.settings;
+        const hasValidMaterial = (
+            bloom.type === BloomType.KawaseDualFilter && !!bloom.kawaseFilterMaterial ||
+            bloom.type === BloomType.MipmapFilter && !!bloom.mipmapFilterMaterial
+        );
+        cameraConfigs.enableBloom = bloom.enabled && hasValidMaterial;
+
         if (cameraConfigs.enableBloom) {
             ++cameraConfigs.remainingPasses;
         }
@@ -1008,17 +1023,56 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
         pplConfigs: Readonly<PipelineConfigs>,
         cameraConfigs: CameraConfigs & BloomPassConfigs,
         window: renderer.RenderWindow): void {
-        if (cameraConfigs.enableBloom) {
-            const id = window.renderWindowId;
+        if (!cameraConfigs.enableBloom) {
+            return;
+        }
+
+        const { width, height, settings: { bloom } } = cameraConfigs;
+        const id = window.renderWindowId;
+        const format = cameraConfigs.radianceFormat;
+
+        if (bloom.type === BloomType.KawaseDualFilter) {
             let bloomWidth = cameraConfigs.width;
             let bloomHeight = cameraConfigs.height;
-            for (let i = 0; i !== cameraConfigs.settings.bloom.iterations + 1; ++i) {
+            for (let i = 0; i !== bloom.iterations + 1; ++i) {
                 bloomWidth = Math.max(Math.floor(bloomWidth / 2), 1);
                 bloomHeight = Math.max(Math.floor(bloomHeight / 2), 1);
-                ppl.addRenderTarget(`BloomTex${id}_${i}`,
-                    cameraConfigs.radianceFormat, bloomWidth, bloomHeight);
+                ppl.addRenderTarget(`BloomTex${id}_${i}`, format, bloomWidth, bloomHeight);
             }
+        } else if (bloom.type === BloomType.MipmapFilter) {
+            const iterations = bloom.iterations;
+            for (let i = 0; i !== bloom.iterations + 1; ++i) {
+                // DownSample
+                if (i < iterations) {
+                    const scale = Math.pow(0.5, i + 2);
+                    this._bloomDownSampleTexDescs[i] = this.createTexture(
+                        ppl,
+                        `DownSampleColor${id}${i}`,
+                        downSize(width, scale),
+                        downSize(height, scale),
+                        format);
+                }
+                // UpSample
+                if (i < iterations - 1) {
+                    const scale = Math.pow(0.5, iterations - i - 1);
+                    this._bloomUpSampleTexDescs[i] = this.createTexture(
+                        ppl,
+                        `UpSampleColor${id}${i}`,
+                        downSize(width, scale),
+                        downSize(height, scale),
+                        format);
+                }
+            }
+            this._originalColorDesc = this.createTexture(ppl, `OriginalColor${id}`, width, height, format);
+            this._prefilterTexDesc = this.createTexture(ppl, `PrefilterColor${id}`, width * 0.5, height * 0.5, format);
         }
+    }
+    private createTexture(
+        ppl: rendering.BasicPipeline,
+        name: string, width: number, height: number, format: number): RenderTextureDesc {
+        const desc = { name, width, height };
+        ppl.addRenderTarget(desc.name, format, desc.width, desc.height);
+        return desc;
     }
 
     setup(
@@ -1035,19 +1089,41 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
 
         --cameraConfigs.remainingPasses;
         assert(cameraConfigs.remainingPasses >= 0);
-        const id = camera.window.renderWindowId;
-        assert(!!cameraConfigs.settings.bloom.material);
-        return this._addKawaseDualFilterBloomPasses(
-            ppl, pplConfigs,
-            cameraConfigs,
-            cameraConfigs.settings,
-            cameraConfigs.settings.bloom.material,
-            id,
-            cameraConfigs.width,
-            cameraConfigs.height,
-            context.colorName);
-    }
 
+        const bloom = cameraConfigs.settings.bloom;
+        const id = camera.window.renderWindowId;
+
+        switch (bloom.type) {
+            case BloomType.KawaseDualFilter: {
+                const material = bloom.kawaseFilterMaterial;
+                assert(!!material);
+                return this._addKawaseDualFilterBloomPasses(
+                    ppl, pplConfigs,
+                    cameraConfigs,
+                    cameraConfigs.settings,
+                    material,
+                    id,
+                    cameraConfigs.width,
+                    cameraConfigs.height,
+                    context.colorName);
+            }
+            case BloomType.MipmapFilter: {
+                const material = bloom.mipmapFilterMaterial;
+                assert(!!material);
+                return this._addMipmapFilterBloomPasses(
+                    ppl, pplConfigs,
+                    cameraConfigs,
+                    cameraConfigs.settings,
+                    material,
+                    id,
+                    cameraConfigs.width,
+                    cameraConfigs.height,
+                    context.colorName);
+            }
+            default:
+                return prevRenderPass;
+        }
+    }
     private _addKawaseDualFilterBloomPasses(
         ppl: rendering.BasicPipeline,
         pplConfigs: Readonly<PipelineConfigs>,
@@ -1084,7 +1160,7 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
 
         // Setup bloom parameters
         this._bloomParams.x = pplConfigs.useFloatOutput ? 1 : 0;
-        this._bloomParams.x = 0; // unused
+        this._bloomParams.y = 0; // unused
         this._bloomParams.z = settings.bloom.threshold;
         this._bloomParams.w = settings.bloom.enableAlphaMask ? 1 : 0;
 
@@ -1129,6 +1205,7 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
         }
 
         // Combine pass
+        this._bloomParams.w = settings.bloom.intensity / 2.3; // Divide by 2.3 to match the original bloom intensity
         const combinePass = ppl.addRenderPass(width, height, 'cc-bloom-combine');
         combinePass.addRenderTarget(radianceName, LoadOp.LOAD, StoreOp.STORE);
         combinePass.addTexture(this._bloomTexNames[0], 'bloomTexture');
@@ -1143,6 +1220,117 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
             return combinePass;
         }
     }
+    private _addPass(
+        ppl: rendering.BasicPipeline,
+        width: number,
+        height: number,
+        layout: string,
+        colorName: string,
+        material: Material,
+        passIndex: number,
+        loadOp: gfx.LoadOp = LoadOp.CLEAR,
+        clearColor: gfx.Color = sClearColorTransparentBlack,
+        queueHint: rendering.QueueHint = rendering.QueueHint.OPAQUE): rendering.BasicRenderPassBuilder {
+        const pass = ppl.addRenderPass(width, height, layout);
+        pass.addRenderTarget(colorName, loadOp, StoreOp.STORE, clearColor);
+        pass.addQueue(queueHint)
+            .addFullscreenQuad(material, passIndex);
+        return pass;
+    }
+    private _addMipmapFilterBloomPasses(
+        ppl: rendering.BasicPipeline,
+        pplConfigs: Readonly<PipelineConfigs>,
+        cameraConfigs: CameraConfigs & Readonly<BloomPassConfigs>,
+        settings: PipelineSettings,
+        bloomMaterial: Material,
+        id: number,
+        width: number,
+        height: number,
+        radianceName: string,
+    ): rendering.BasicRenderPassBuilder {
+        // Setup bloom parameters
+        this._bloomParams.x = pplConfigs.useFloatOutput ? 1 : 0;
+        this._bloomParams.x = 0; // unused
+        this._bloomParams.z = settings.bloom.threshold;
+        this._bloomParams.w = settings.bloom.intensity;
+        const prefilterInfo = this._prefilterTexDesc;
+        ppl.addCopyPass([new rendering.CopyPair(radianceName, this._originalColorDesc.name)]);
+        // Prefilter pass
+        let currSamplePass = this._addPass(
+            ppl,
+            prefilterInfo.width,
+            prefilterInfo.height,
+            'cc-bloom-prefilter',
+            prefilterInfo.name,
+            bloomMaterial,
+            0,
+        );
+        currSamplePass.addTexture(radianceName, 'mainTexture');
+        currSamplePass.setVec4('cc_debug_view_mode', this._bloomParams);
+
+        const downSampleInfos = this._bloomDownSampleTexDescs;
+        // Downsample passes
+        for (let i = 0; i < downSampleInfos.length; ++i) {
+            const currInfo = downSampleInfos[i];
+            const samplerSrc = i === 0 ? prefilterInfo : downSampleInfos[i - 1];
+            const samplerSrcName = samplerSrc.name;
+            this._bloomTexSize.x = 1 / samplerSrc.width;
+            this._bloomTexSize.y = 1 / samplerSrc.height;
+            currSamplePass = this._addPass(
+                ppl,
+                currInfo.width,
+                currInfo.height,
+                'cc-bloom-downsample',
+                currInfo.name,
+                bloomMaterial,
+                1,
+            );
+            currSamplePass.addTexture(samplerSrcName, 'mainTexture');
+            currSamplePass.setVec4('cc_debug_view_mode', this._bloomTexSize);
+        }
+        const lastIndex = downSampleInfos.length - 1;
+        const upSampleInfos = this._bloomUpSampleTexDescs;
+        // Upsample passes
+        for (let i = 0; i < upSampleInfos.length; i++) {
+            const currInfo = upSampleInfos[i];
+            const sampleSrc = i === 0 ? downSampleInfos[lastIndex] : upSampleInfos[i - 1];
+            const sampleSrcName = sampleSrc.name;
+            this._bloomTexSize.x = 1 / sampleSrc.width;
+            this._bloomTexSize.y = 1 / sampleSrc.height;
+            currSamplePass = this._addPass(
+                ppl,
+                currInfo.width,
+                currInfo.height,
+                'cc-bloom-upsample',
+                currInfo.name,
+                bloomMaterial,
+                2,
+            );
+            currSamplePass.addTexture(sampleSrcName, 'mainTexture');
+            currSamplePass.addTexture(downSampleInfos[lastIndex - 1 - i].name, 'downsampleTexture');
+            currSamplePass.setVec4('cc_debug_view_mode', this._bloomTexSize);
+        }
+
+        // Combine pass
+        const combinePass = this._addPass(
+            ppl,
+            width,
+            height,
+            'cc-bloom-combine',
+            radianceName,
+            bloomMaterial,
+            3,
+        );
+        combinePass.addTexture(this._originalColorDesc.name, 'mainTexture');
+        combinePass.addTexture(upSampleInfos[upSampleInfos.length - 1].name, 'bloomTexture');
+        combinePass.setVec4('cc_debug_view_mode', this._bloomParams);
+        if (cameraConfigs.remainingPasses === 0) {
+            return addCopyToScreenPass(ppl, pplConfigs, cameraConfigs, radianceName);
+        } else {
+            return combinePass;
+        }
+    }
+
     // Bloom
     private readonly _clearColorTransparentBlack = new Color(0, 0, 0, 0);
     private readonly _bloomParams = new Vec4(0, 0, 0, 0);
@@ -1150,6 +1338,12 @@ export class BuiltinBloomPassBuilder implements rendering.PipelinePassBuilder {
     private readonly _bloomWidths: Array<number> = [];
     private readonly _bloomHeights: Array<number> = [];
     private readonly _bloomTexNames: Array<string> = [];
+
+    // Mipmap Bloom
+    private readonly _bloomUpSampleTexDescs: Array<RenderTextureDesc> = [];
+    private readonly _bloomDownSampleTexDescs: Array<RenderTextureDesc> = [];
+    private _prefilterTexDesc: RenderTextureDesc = { name: '', width: 0, height: 0 };
+    private _originalColorDesc: RenderTextureDesc = { name: '', width: 0, height: 0 };
 }
 
 export interface ToneMappingPassConfigs {

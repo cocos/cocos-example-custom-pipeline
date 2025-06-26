@@ -62,8 +62,9 @@ export class BuiltinDevPipelineSettings extends Component {
     onDisable(): void {
         const cameraComponent = this.getComponent(Camera)!;
         const camera = cameraComponent.camera;
-        camera.pipelineSettings = null;
-
+        if (!!camera) {
+            camera.pipelineSettings = null;
+        }
         if (EDITOR) {
             this._disableEditorPreview();
         }
