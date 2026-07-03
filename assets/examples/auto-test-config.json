@@ -1,0 +1,24 @@
+{
+    "enabled": false,
+    "server": "127.0.0.1",
+    "port": 8080,
+    "timeout": 5000,
+    "maxRetryTimes": 3,
+    "sceneList": [
+        "2d",
+        "3d",
+        "default",
+        "main-001",
+        "main-002-csm",
+        "main-003",
+        "main-006",
+        "pipeline-004",
+        "pipeline-005",
+        "quality",
+        "scene-2d",
+        "scene-moveResource",
+        "scene-quality",
+        "simple-002-csm",
+        "simple-003"
+    ]
+}
