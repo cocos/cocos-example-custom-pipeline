@@ -78,8 +78,15 @@ export class BackButton extends Component {
             let currentScene = str.substring(firstIndex, lastIndex);
             if (!this.noAutoTest || autoTestList.indexOf(currentScene) === -1) {
                 SceneList.sceneArray.push(currentScene);
-                const normalizedPath = str.replace(/^[^:]+:\/\//, '');
-                SceneList.sceneFold.push(normalizedPath.split('/')[0]);
+                const normalizedPath = str
+                    .replace(/\\/g, '/')
+                    .replace(/^[^:]+:\/\//, '')
+                    .replace(/^\/+/, '');
+                const scenePath = normalizedPath
+                    .replace(/^assets\/examples\//, '')
+                    .replace(/^examples\//, '')
+                    .replace(/^assets\//, '');
+                SceneList.sceneFold.push(scenePath.split('/')[0]);
             }
         }
     }
