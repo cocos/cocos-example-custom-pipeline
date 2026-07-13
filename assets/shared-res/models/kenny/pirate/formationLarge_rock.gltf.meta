@@ -1,0 +1,113 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "cda269e5-c27c-466e-85b8-fbfa144b5bc6",
+  "files": [],
+  "subMetas": {
+    "43555": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "cda269e5-c27c-466e-85b8-fbfa144b5bc6@43555",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "43555",
+      "name": "formationLarge_rock.prefab",
+      "displayName": ""
+    },
+    "dd4b2": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "cda269e5-c27c-466e-85b8-fbfa144b5bc6@dd4b2",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 136
+      },
+      "id": "dd4b2",
+      "name": "formationLarge_rock.mesh",
+      "displayName": ""
+    },
+    "e4014": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "cda269e5-c27c-466e-85b8-fbfa144b5bc6@e4014",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "e4014",
+      "name": "wood.material",
+      "displayName": ""
+    },
+    "5f31f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "cda269e5-c27c-466e-85b8-fbfa144b5bc6@5f31f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "5f31f",
+      "name": "sand.material",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "cda269e5-c27c-466e-85b8-fbfa144b5bc6@dd4b2"
+      ],
+      "materials": [
+        "cda269e5-c27c-466e-85b8-fbfa144b5bc6@e4014",
+        "cda269e5-c27c-466e-85b8-fbfa144b5bc6@5f31f"
+      ],
+      "scenes": [
+        "cda269e5-c27c-466e-85b8-fbfa144b5bc6@43555"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

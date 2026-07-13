@@ -1,0 +1,15 @@
+{
+  "ver": "1.2.0",
+  "importer": "directory",
+  "imported": true,
+  "uuid": "f1a4fcec-f091-47b2-8711-fab419a93192",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "isSubpackage": true,
+    "subpackageName": "subPackage",
+    "isBundle": true,
+    "bundleName": "subPackage",
+    "bundleConfigID": "auto_6acrVjL21C54emd5nf54bR"
+  }
+}

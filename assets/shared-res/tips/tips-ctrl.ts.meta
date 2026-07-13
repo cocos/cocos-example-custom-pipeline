@@ -1,0 +1,13 @@
+{
+  "ver": "4.0.24",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "f0d55640-e473-403b-84f8-c73563d83556",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "moduleId": "project:///assets/shared-res/tips/tips-ctrl.js",
+    "importerSettings": 0,
+    "simulateGlobals": []
+  }
+}

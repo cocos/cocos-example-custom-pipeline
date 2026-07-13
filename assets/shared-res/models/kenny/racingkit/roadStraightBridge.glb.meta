@@ -1,0 +1,147 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c",
+  "files": [],
+  "subMetas": {
+    "a6d73": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c@a6d73",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 44
+      },
+      "id": "a6d73",
+      "name": "Mesh noExport.mesh",
+      "displayName": ""
+    },
+    "7d412": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c@7d412",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "7d412",
+      "name": "wall.material",
+      "displayName": ""
+    },
+    "d63d5": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c@d63d5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "d63d5",
+      "name": "grey.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "0ee4f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c@0ee4f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 3
+      },
+      "id": "0ee4f",
+      "name": "_defaultMat.material",
+      "displayName": ""
+    },
+    "ab2ad": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "28b8e602-f043-4216-b696-6ffdf9bc416c@ab2ad",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "ab2ad",
+      "name": "roadStraightBridge.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "28b8e602-f043-4216-b696-6ffdf9bc416c@a6d73"
+      ],
+      "materials": [
+        "28b8e602-f043-4216-b696-6ffdf9bc416c@7d412",
+        "28b8e602-f043-4216-b696-6ffdf9bc416c@d63d5",
+        "28b8e602-f043-4216-b696-6ffdf9bc416c@35ea4",
+        "28b8e602-f043-4216-b696-6ffdf9bc416c@0ee4f"
+      ],
+      "scenes": [
+        "28b8e602-f043-4216-b696-6ffdf9bc416c@ab2ad"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

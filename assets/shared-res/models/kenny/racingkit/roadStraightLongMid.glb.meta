@@ -1,0 +1,130 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "9ed685d1-35d9-49d8-a75b-0462b374c2b0",
+  "files": [],
+  "subMetas": {
+    "53398": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "9ed685d1-35d9-49d8-a75b-0462b374c2b0@53398",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "53398",
+      "name": "grass.material",
+      "displayName": ""
+    },
+    "f75bd": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "9ed685d1-35d9-49d8-a75b-0462b374c2b0@f75bd",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 122
+      },
+      "id": "f75bd",
+      "name": "Mesh roadStraightLongMid.mesh",
+      "displayName": ""
+    },
+    "d63d5": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "9ed685d1-35d9-49d8-a75b-0462b374c2b0@d63d5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "d63d5",
+      "name": "grey.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "9ed685d1-35d9-49d8-a75b-0462b374c2b0@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "d0b35": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "9ed685d1-35d9-49d8-a75b-0462b374c2b0@d0b35",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "d0b35",
+      "name": "roadStraightLongMid.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "9ed685d1-35d9-49d8-a75b-0462b374c2b0@f75bd"
+      ],
+      "materials": [
+        "9ed685d1-35d9-49d8-a75b-0462b374c2b0@53398",
+        "9ed685d1-35d9-49d8-a75b-0462b374c2b0@d63d5",
+        "9ed685d1-35d9-49d8-a75b-0462b374c2b0@35ea4"
+      ],
+      "scenes": [
+        "9ed685d1-35d9-49d8-a75b-0462b374c2b0@d0b35"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

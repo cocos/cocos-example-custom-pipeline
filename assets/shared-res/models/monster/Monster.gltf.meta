@@ -1,0 +1,186 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "3174824f-f1f2-4011-8709-15d89417ad89",
+  "files": [
+    "__original-animation-0.bin"
+  ],
+  "subMetas": {
+    "cf79d": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "3174824f-f1f2-4011-8709-15d89417ad89@cf79d",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 884
+      },
+      "id": "cf79d",
+      "name": "monster.mesh",
+      "displayName": ""
+    },
+    "a3140": {
+      "ver": "1.0.18",
+      "importer": "gltf-animation",
+      "uuid": "3174824f-f1f2-4011-8709-15d89417ad89@a3140",
+      "imported": true,
+      "files": [
+        ".bin"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "sample": 30,
+        "span": {
+          "from": 0,
+          "to": 3.333329916000366
+        },
+        "events": [],
+        "wrapMode": 2
+      },
+      "displayName": "",
+      "id": "a3140",
+      "name": "UnnamedAnimation.animation"
+    },
+    "f9d1d": {
+      "ver": "1.0.1",
+      "importer": "gltf-skeleton",
+      "uuid": "3174824f-f1f2-4011-8709-15d89417ad89@f9d1d",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "jointsLength": 32
+      },
+      "id": "f9d1d",
+      "name": "Armature.skeleton",
+      "displayName": ""
+    },
+    "e39f7": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "3174824f-f1f2-4011-8709-15d89417ad89@e39f7",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "nearest",
+        "magfilter": "linear",
+        "mipfilter": "linear",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/shared-res/models/monster/Monster.jpg"
+      },
+      "id": "e39f7",
+      "name": "UnnamedTexture.texture",
+      "displayName": ""
+    },
+    "58bf7": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "3174824f-f1f2-4011-8709-15d89417ad89@58bf7",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "58bf7",
+      "name": "monster-effect.material",
+      "displayName": ""
+    },
+    "a07f9": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "3174824f-f1f2-4011-8709-15d89417ad89@a07f9",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "a07f9",
+      "name": "Monster.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "animationImportSettings": [
+      {
+        "name": "UnnamedAnimation",
+        "duration": 3.333329916000366,
+        "fps": 30,
+        "splits": [
+          {
+            "name": "UnnamedAnimation",
+            "from": 0,
+            "to": 3.333329916000366,
+            "wrapMode": 2,
+            "previousId": "a3140"
+          }
+        ]
+      }
+    ],
+    "assetFinder": {
+      "meshes": [
+        "3174824f-f1f2-4011-8709-15d89417ad89@cf79d"
+      ],
+      "skeletons": [
+        "3174824f-f1f2-4011-8709-15d89417ad89@f9d1d"
+      ],
+      "textures": [
+        "3174824f-f1f2-4011-8709-15d89417ad89@e39f7"
+      ],
+      "materials": [
+        "3174824f-f1f2-4011-8709-15d89417ad89@58bf7"
+      ],
+      "scenes": [
+        "3174824f-f1f2-4011-8709-15d89417ad89@a07f9"
+      ]
+    },
+    "imageMetas": [
+      {
+        "uri": "db://assets/shared-res/models/monster/Monster.jpg"
+      }
+    ],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

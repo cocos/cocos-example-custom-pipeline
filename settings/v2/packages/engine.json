@@ -20,7 +20,6 @@
     },
     "configs": {
       "migrationsConfig": {
-        "name": "Migrated Configuration",
         "cache": {
           "base": {
             "_value": true
@@ -52,9 +51,6 @@
           "sorting-2d": {
             "_value": false
           },
-          "xr": {
-            "_value": false
-          },
           "rich-text": {
             "_value": true
           },
@@ -78,7 +74,7 @@
           },
           "physics": {
             "_value": true,
-            "_option": "physics-physx"
+            "_option": "physics-cannon"
           },
           "physics-ammo": {
             "_value": false,
@@ -100,7 +96,7 @@
           },
           "physics-2d": {
             "_value": true,
-            "_option": "physics-2d-box2d"
+            "_option": "physics-2d-builtin"
           },
           "physics-2d-box2d": {
             "_value": false
@@ -133,7 +129,7 @@
             "_value": true
           },
           "debug-renderer": {
-            "_value": false
+            "_value": true
           },
           "particle-2d": {
             "_value": true
@@ -188,7 +184,7 @@
             "_value": true
           },
           "marionette": {
-            "_value": true
+            "_value": false
           },
           "procedural-animation": {
             "_value": false
@@ -206,11 +202,17 @@
           "legacy-pipeline": {
             "_value": false
           },
+          "xr": {
+            "_value": false
+          },
           "graphcis": {
             "_value": true
           }
         },
-        "flags": {},
+        "flags": {
+          "LOAD_SPINE_MANUALLY": false
+        },
+        "name": "Migrated Configuration",
         "includeModules": [
           "2d",
           "3d",
@@ -219,6 +221,7 @@
           "audio",
           "base",
           "custom-pipeline",
+          "debug-renderer",
           "dragon-bones",
           "geometry-renderer",
           "gfx-webgl",
@@ -226,12 +229,11 @@
           "graphics",
           "intersection-2d",
           "light-probe",
-          "marionette",
           "mask",
           "particle",
           "particle-2d",
-          "physics-2d-box2d",
-          "physics-physx",
+          "physics-2d-builtin",
+          "physics-cannon",
           "primitive",
           "profiler",
           "rich-text",

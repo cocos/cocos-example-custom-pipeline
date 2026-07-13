@@ -1,0 +1,181 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "8832827d-167e-42a3-9bd6-071fe0690136",
+  "files": [],
+  "subMetas": {
+    "53398": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@53398",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 5
+      },
+      "id": "53398",
+      "name": "grass.material",
+      "displayName": ""
+    },
+    "7300b": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@7300b",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 268
+      },
+      "id": "7300b",
+      "name": "Mesh lightColored.mesh",
+      "displayName": ""
+    },
+    "0ee4f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@0ee4f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "0ee4f",
+      "name": "_defaultMat.material",
+      "displayName": ""
+    },
+    "d63d5": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@d63d5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "d63d5",
+      "name": "grey.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "1ed61": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@1ed61",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 3
+      },
+      "id": "1ed61",
+      "name": "pylon.material",
+      "displayName": ""
+    },
+    "92dfd": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@92dfd",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 4
+      },
+      "id": "92dfd",
+      "name": "red.material",
+      "displayName": ""
+    },
+    "82ea9": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "8832827d-167e-42a3-9bd6-071fe0690136@82ea9",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "82ea9",
+      "name": "lightColored.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "8832827d-167e-42a3-9bd6-071fe0690136@7300b"
+      ],
+      "materials": [
+        "8832827d-167e-42a3-9bd6-071fe0690136@0ee4f",
+        "8832827d-167e-42a3-9bd6-071fe0690136@d63d5",
+        "8832827d-167e-42a3-9bd6-071fe0690136@35ea4",
+        "8832827d-167e-42a3-9bd6-071fe0690136@1ed61",
+        "8832827d-167e-42a3-9bd6-071fe0690136@92dfd",
+        "8832827d-167e-42a3-9bd6-071fe0690136@53398"
+      ],
+      "scenes": [
+        "8832827d-167e-42a3-9bd6-071fe0690136@82ea9"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

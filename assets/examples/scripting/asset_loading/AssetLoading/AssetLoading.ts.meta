@@ -1,0 +1,13 @@
+{
+  "ver": "4.0.24",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "b7a3837f-cac0-4fc5-bff5-8371013df9f8",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "moduleId": "project:///assets/cases/scripting/asset_loading/AssetLoading/AssetLoading.js",
+    "importerSettings": 0,
+    "simulateGlobals": []
+  }
+}

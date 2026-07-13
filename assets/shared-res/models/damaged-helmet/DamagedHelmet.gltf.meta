@@ -1,0 +1,238 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c",
+  "files": [],
+  "subMetas": {
+    "28803": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@28803",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "28803",
+      "name": "Material_MR.material",
+      "displayName": ""
+    },
+    "92175": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@92175",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 15452
+      },
+      "id": "92175",
+      "name": "mesh_helmet_LP_13930damagedHelmet.mesh",
+      "displayName": ""
+    },
+    "3effa": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@3effa",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/shared-res/models/damaged-helmet/Default_albedo.jpg"
+      },
+      "id": "3effa",
+      "name": "UnnamedTexture-0.texture",
+      "displayName": ""
+    },
+    "221a5": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@221a5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/shared-res/models/damaged-helmet/Default_metalRoughness.jpg"
+      },
+      "id": "221a5",
+      "name": "UnnamedTexture-1.texture",
+      "displayName": ""
+    },
+    "0089c": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@0089c",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/shared-res/models/damaged-helmet/Default_emissive.jpg"
+      },
+      "id": "0089c",
+      "name": "UnnamedTexture-2.texture",
+      "displayName": ""
+    },
+    "9b633": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@9b633",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/shared-res/models/damaged-helmet/Default_AO.jpg"
+      },
+      "id": "9b633",
+      "name": "UnnamedTexture-3.texture",
+      "displayName": ""
+    },
+    "9b782": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@9b782",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/shared-res/models/damaged-helmet/Default_normal.jpg"
+      },
+      "id": "9b782",
+      "name": "UnnamedTexture-4.texture",
+      "displayName": ""
+    },
+    "3b75d": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "de6314a3-4e89-4cd8-8653-07c7cc969d4c@3b75d",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "3b75d",
+      "name": "DamagedHelmet.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@92175"
+      ],
+      "textures": [
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@3effa",
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@221a5",
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@0089c",
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@9b633",
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@9b782"
+      ],
+      "materials": [
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@28803"
+      ],
+      "scenes": [
+        "de6314a3-4e89-4cd8-8653-07c7cc969d4c@3b75d"
+      ],
+      "skeletons": []
+    },
+    "imageMetas": [
+      {
+        "uri": "db://assets/shared-res/models/damaged-helmet/Default_albedo.jpg"
+      },
+      {
+        "uri": "db://assets/shared-res/models/damaged-helmet/Default_metalRoughness.jpg"
+      },
+      {
+        "uri": "db://assets/shared-res/models/damaged-helmet/Default_emissive.jpg"
+      },
+      {
+        "uri": "db://assets/shared-res/models/damaged-helmet/Default_AO.jpg"
+      },
+      {
+        "uri": "db://assets/shared-res/models/damaged-helmet/Default_normal.jpg"
+      }
+    ],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

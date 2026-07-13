@@ -1,0 +1,130 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "740d0708-2cfc-4c63-880e-cc1e27586648",
+  "files": [],
+  "subMetas": {
+    "fa9ee": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "740d0708-2cfc-4c63-880e-cc1e27586648@fa9ee",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 76
+      },
+      "id": "fa9ee",
+      "name": "Mesh roadCornerLargeWallInner.mesh",
+      "displayName": ""
+    },
+    "b31f4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "740d0708-2cfc-4c63-880e-cc1e27586648@b31f4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "b31f4",
+      "name": "white.material",
+      "displayName": ""
+    },
+    "92dfd": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "740d0708-2cfc-4c63-880e-cc1e27586648@92dfd",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "92dfd",
+      "name": "red.material",
+      "displayName": ""
+    },
+    "0ee4f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "740d0708-2cfc-4c63-880e-cc1e27586648@0ee4f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "0ee4f",
+      "name": "_defaultMat.material",
+      "displayName": ""
+    },
+    "8d480": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "740d0708-2cfc-4c63-880e-cc1e27586648@8d480",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "8d480",
+      "name": "roadCornerLargeWallInner.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "740d0708-2cfc-4c63-880e-cc1e27586648@fa9ee"
+      ],
+      "materials": [
+        "740d0708-2cfc-4c63-880e-cc1e27586648@b31f4",
+        "740d0708-2cfc-4c63-880e-cc1e27586648@92dfd",
+        "740d0708-2cfc-4c63-880e-cc1e27586648@0ee4f"
+      ],
+      "scenes": [
+        "740d0708-2cfc-4c63-880e-cc1e27586648@8d480"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

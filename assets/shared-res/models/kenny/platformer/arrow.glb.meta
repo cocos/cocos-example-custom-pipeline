@@ -1,0 +1,132 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "30db11e6-a84f-4873-a3e9-0952d56aad67",
+  "files": [],
+  "subMetas": {
+    "45187": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "30db11e6-a84f-4873-a3e9-0952d56aad67@45187",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1,
+        "triangleCount": 24
+      },
+      "id": "45187",
+      "name": "Mesh arrow-1.mesh",
+      "displayName": ""
+    },
+    "019e3": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "30db11e6-a84f-4873-a3e9-0952d56aad67@019e3",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 24
+      },
+      "id": "019e3",
+      "name": "Mesh arrow-0.mesh",
+      "displayName": ""
+    },
+    "938e8": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "30db11e6-a84f-4873-a3e9-0952d56aad67@938e8",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "938e8",
+      "name": "woodDark.material",
+      "displayName": ""
+    },
+    "e4014": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "30db11e6-a84f-4873-a3e9-0952d56aad67@e4014",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "e4014",
+      "name": "wood.material",
+      "displayName": ""
+    },
+    "0d683": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "30db11e6-a84f-4873-a3e9-0952d56aad67@0d683",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "0d683",
+      "name": "arrow.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "30db11e6-a84f-4873-a3e9-0952d56aad67@019e3",
+        "30db11e6-a84f-4873-a3e9-0952d56aad67@45187"
+      ],
+      "materials": [
+        "30db11e6-a84f-4873-a3e9-0952d56aad67@938e8",
+        "30db11e6-a84f-4873-a3e9-0952d56aad67@e4014"
+      ],
+      "scenes": [
+        "30db11e6-a84f-4873-a3e9-0952d56aad67@0d683"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

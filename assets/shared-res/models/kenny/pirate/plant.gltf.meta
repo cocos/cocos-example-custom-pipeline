@@ -1,0 +1,96 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee",
+  "files": [],
+  "subMetas": {
+    "25602": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee@25602",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "25602",
+      "name": "plant.prefab",
+      "displayName": ""
+    },
+    "d8986": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee@d8986",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 60
+      },
+      "id": "d8986",
+      "name": "plant.mesh",
+      "displayName": ""
+    },
+    "a1dfa": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee@a1dfa",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "a1dfa",
+      "name": "leaves.material",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee@d8986"
+      ],
+      "materials": [
+        "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee@a1dfa"
+      ],
+      "scenes": [
+        "ef4bd78a-24e1-4261-bf87-a16c8d7ad2ee@25602"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

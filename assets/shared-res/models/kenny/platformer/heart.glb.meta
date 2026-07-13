@@ -1,0 +1,96 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "cb470193-b517-4296-a565-b4aae8996327",
+  "files": [],
+  "subMetas": {
+    "60206": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "cb470193-b517-4296-a565-b4aae8996327@60206",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "60206",
+      "name": "heart.prefab",
+      "displayName": ""
+    },
+    "173c3": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "cb470193-b517-4296-a565-b4aae8996327@173c3",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 50
+      },
+      "id": "173c3",
+      "name": "Mesh heart.mesh",
+      "displayName": ""
+    },
+    "4e300": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "cb470193-b517-4296-a565-b4aae8996327@4e300",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "4e300",
+      "name": "heart.material",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "cb470193-b517-4296-a565-b4aae8996327@173c3"
+      ],
+      "materials": [
+        "cb470193-b517-4296-a565-b4aae8996327@4e300"
+      ],
+      "scenes": [
+        "cb470193-b517-4296-a565-b4aae8996327@60206"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

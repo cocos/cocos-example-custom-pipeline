@@ -1,0 +1,130 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "e432693c-f4e2-4013-aca0-f9fdcf228e51",
+  "files": [],
+  "subMetas": {
+    "194d5": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "e432693c-f4e2-4013-aca0-f9fdcf228e51@194d5",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 260
+      },
+      "id": "194d5",
+      "name": "Mesh roadCornerBridgeSmall.mesh",
+      "displayName": ""
+    },
+    "7d412": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "e432693c-f4e2-4013-aca0-f9fdcf228e51@7d412",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "7d412",
+      "name": "wall.material",
+      "displayName": ""
+    },
+    "d63d5": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "e432693c-f4e2-4013-aca0-f9fdcf228e51@d63d5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "d63d5",
+      "name": "grey.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "e432693c-f4e2-4013-aca0-f9fdcf228e51@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "6f0ec": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "e432693c-f4e2-4013-aca0-f9fdcf228e51@6f0ec",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "6f0ec",
+      "name": "roadCornerBridgeSmall.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "e432693c-f4e2-4013-aca0-f9fdcf228e51@194d5"
+      ],
+      "materials": [
+        "e432693c-f4e2-4013-aca0-f9fdcf228e51@7d412",
+        "e432693c-f4e2-4013-aca0-f9fdcf228e51@d63d5",
+        "e432693c-f4e2-4013-aca0-f9fdcf228e51@35ea4"
+      ],
+      "scenes": [
+        "e432693c-f4e2-4013-aca0-f9fdcf228e51@6f0ec"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

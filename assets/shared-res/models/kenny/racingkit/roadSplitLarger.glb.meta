@@ -1,0 +1,130 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "d9e28293-fb77-46b7-8711-b85de4f6d373",
+  "files": [],
+  "subMetas": {
+    "53398": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "d9e28293-fb77-46b7-8711-b85de4f6d373@53398",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "53398",
+      "name": "grass.material",
+      "displayName": ""
+    },
+    "e8622": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "d9e28293-fb77-46b7-8711-b85de4f6d373@e8622",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 201
+      },
+      "id": "e8622",
+      "name": "Mesh roadSplitLarger.mesh",
+      "displayName": ""
+    },
+    "0ee4f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "d9e28293-fb77-46b7-8711-b85de4f6d373@0ee4f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "0ee4f",
+      "name": "_defaultMat.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "d9e28293-fb77-46b7-8711-b85de4f6d373@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "91eca": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "d9e28293-fb77-46b7-8711-b85de4f6d373@91eca",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "91eca",
+      "name": "roadSplitLarger.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "d9e28293-fb77-46b7-8711-b85de4f6d373@e8622"
+      ],
+      "materials": [
+        "d9e28293-fb77-46b7-8711-b85de4f6d373@0ee4f",
+        "d9e28293-fb77-46b7-8711-b85de4f6d373@53398",
+        "d9e28293-fb77-46b7-8711-b85de4f6d373@35ea4"
+      ],
+      "scenes": [
+        "d9e28293-fb77-46b7-8711-b85de4f6d373@91eca"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

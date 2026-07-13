@@ -1,0 +1,113 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7",
+  "files": [],
+  "subMetas": {
+    "53398": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@53398",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "53398",
+      "name": "grass.material",
+      "displayName": ""
+    },
+    "e828e": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@e828e",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 132
+      },
+      "id": "e828e",
+      "name": "Mesh tentRoof.mesh",
+      "displayName": ""
+    },
+    "d63d5": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@d63d5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "d63d5",
+      "name": "grey.material",
+      "displayName": ""
+    },
+    "edaa8": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@edaa8",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "edaa8",
+      "name": "tentRoof.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@e828e"
+      ],
+      "materials": [
+        "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@d63d5",
+        "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@53398"
+      ],
+      "scenes": [
+        "08aa84bf-500c-4728-a8b0-2efd8fbe3cb7@edaa8"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

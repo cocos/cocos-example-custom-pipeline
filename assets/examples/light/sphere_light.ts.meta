@@ -1,0 +1,13 @@
+{
+  "ver": "4.0.24",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "a20180fc-2777-4889-8389-7fc453bfd540",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "moduleId": "project:///assets/cases/light/sphere_light.js",
+    "importerSettings": 0,
+    "simulateGlobals": []
+  }
+}

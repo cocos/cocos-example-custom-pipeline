@@ -1,0 +1,147 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4",
+  "files": [],
+  "subMetas": {
+    "b7718": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@b7718",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 1022
+      },
+      "id": "b7718",
+      "name": "Mesh grandStandRound.mesh",
+      "displayName": ""
+    },
+    "d63d5": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@d63d5",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "d63d5",
+      "name": "grey.material",
+      "displayName": ""
+    },
+    "92dfd": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@92dfd",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "92dfd",
+      "name": "red.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "0ee4f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@0ee4f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 3
+      },
+      "id": "0ee4f",
+      "name": "_defaultMat.material",
+      "displayName": ""
+    },
+    "fbfb7": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@fbfb7",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "fbfb7",
+      "name": "grandStandRound.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@b7718"
+      ],
+      "materials": [
+        "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@d63d5",
+        "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@92dfd",
+        "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@35ea4",
+        "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@0ee4f"
+      ],
+      "scenes": [
+        "bc4ebd87-ec65-47ff-b3d6-867cb6b3d3e4@fbfb7"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

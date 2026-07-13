@@ -1,0 +1,44 @@
+{
+    "package_version": 2,
+    "version": "0.4.6",
+    "name": "automation-framework",
+    "description": "i18n:automation-framework.description",
+    "main": "./dist/main.js",
+    "scripts": {
+        "build:dev": "cross-env NODE_ENV=development rollup -c ./rollup.config.js -w",
+        "build:prod": "cross-env NODE_ENV=production rollup -c ./rollup.config.js --zip",
+        "watch": "tsc -w"
+    },
+    "dependencies": {
+        "fs-extra": "^10.1.0",
+        "pako": "^2.0.4"
+    },
+    "devDependencies": {
+        "@editor/library-type": "^3.5.0-80918",
+        "@rollup/plugin-commonjs": "^23.0.0",
+        "@rollup/plugin-json": "^5.0.0",
+        "@rollup/plugin-node-resolve": "^14.1.0",
+        "@types/adm-zip": "^0.5.0",
+        "@types/fs-extra": "^9.0.13",
+        "adm-zip": "^0.5.9",
+        "@types/node": "^16.0.1",
+        "cross-env": "^7.0.3",
+        "rollup-plugin-delete": "^2.0.0",
+        "rollup-plugin-filesize": "^9.1.2",
+        "rollup-plugin-sizes": "^1.0.4",
+        "rollup-plugin-terser": "^7.0.2",
+        "rollup-plugin-typescript2": "^0.34.1",
+        "typescript": "^4.3.4"
+    },
+    "author": "Cocos Creator",
+    "editor": ">=3.6.0",
+    "contributions": {
+        "builder": "./dist/builder.js",
+        "asset-db": {
+            "mount": {
+                "path": "./assets",
+                "readonly": false
+            }
+        }
+    }
+}

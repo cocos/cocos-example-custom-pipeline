@@ -1,0 +1,264 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "3004862e-868e-4b34-95cb-f185d324e081",
+  "files": [
+    "__original-animation-0.bin"
+  ],
+  "subMetas": {
+    "57146": {
+      "ver": "1.0.18",
+      "importer": "gltf-animation",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@57146",
+      "imported": true,
+      "files": [
+        ".bin"
+      ],
+      "subMetas": {},
+      "userData": {
+        "events": [],
+        "gltfIndex": 0,
+        "sample": 30,
+        "span": {
+          "from": 7.166666666666667,
+          "to": 10.766666666666667
+        },
+        "speed": 1,
+        "wrapMode": 2
+      },
+      "id": "57146",
+      "name": "Walk.animation",
+      "displayName": ""
+    },
+    "3a99e": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@3a99e",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 576
+      },
+      "id": "3a99e",
+      "name": "fox1_fox_material_0.mesh",
+      "displayName": ""
+    },
+    "73b7f": {
+      "ver": "1.0.18",
+      "importer": "gltf-animation",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@73b7f",
+      "imported": true,
+      "files": [
+        ".bin"
+      ],
+      "subMetas": {},
+      "userData": {
+        "events": [],
+        "gltfIndex": 0,
+        "sample": 30,
+        "span": {
+          "from": 0,
+          "to": 15.9375
+        },
+        "speed": 1,
+        "wrapMode": 2
+      },
+      "id": "73b7f",
+      "name": "Take 001.animation",
+      "displayName": ""
+    },
+    "c2696": {
+      "ver": "1.0.18",
+      "importer": "gltf-animation",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@c2696",
+      "imported": true,
+      "files": [
+        ".bin"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "sample": 30,
+        "span": {
+          "from": 0,
+          "to": 7.166666666666667
+        },
+        "events": [],
+        "wrapMode": 2
+      },
+      "id": "c2696",
+      "name": "Idle.animation",
+      "displayName": ""
+    },
+    "9292d": {
+      "ver": "1.0.18",
+      "importer": "gltf-animation",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@9292d",
+      "imported": true,
+      "files": [
+        ".bin"
+      ],
+      "subMetas": {},
+      "userData": {
+        "events": [],
+        "gltfIndex": 0,
+        "sample": 30,
+        "span": {
+          "from": 10.766666666666667,
+          "to": 15.9375
+        },
+        "wrapMode": 2,
+        "speed": 1
+      },
+      "id": "9292d",
+      "name": "Run.animation",
+      "displayName": ""
+    },
+    "438fe": {
+      "ver": "1.0.1",
+      "importer": "gltf-skeleton",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@438fe",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "jointsLength": 24
+      },
+      "id": "438fe",
+      "name": "UnnamedSkeleton.skeleton",
+      "displayName": ""
+    },
+    "e39f7": {
+      "ver": "1.0.22",
+      "importer": "texture",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@e39f7",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "linear",
+        "premultiplyAlpha": false,
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/examples/animation/low_poly_fox_by_pixelmannen_animated/textures/fox_material_baseColor.png"
+      },
+      "id": "e39f7",
+      "name": "UnnamedTexture.texture",
+      "displayName": ""
+    },
+    "d1932": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "3004862e-868e-4b34-95cb-f185d324e081@d1932",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "d1932",
+      "name": "scene.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": true,
+    "animationImportSettings": [
+      {
+        "name": "Take 001",
+        "duration": 15.9375,
+        "fps": 30,
+        "splits": [
+          {
+            "name": "Take 001",
+            "from": 0,
+            "to": 15.9375,
+            "wrapMode": 2,
+            "previousId": "73b7f"
+          },
+          {
+            "name": "Idle",
+            "from": 0,
+            "to": 7.166666666666667,
+            "wrapMode": 2,
+            "previousId": "c2696"
+          },
+          {
+            "name": "Walk",
+            "from": 7.166666666666667,
+            "to": 10.766666666666667,
+            "wrapMode": 2,
+            "previousId": "57146"
+          },
+          {
+            "name": "Run",
+            "from": 10.766666666666667,
+            "to": 15.9375,
+            "wrapMode": 2,
+            "previousId": "9292d"
+          }
+        ]
+      }
+    ],
+    "assetFinder": {
+      "meshes": [
+        "3004862e-868e-4b34-95cb-f185d324e081@3a99e"
+      ],
+      "skeletons": [
+        "3004862e-868e-4b34-95cb-f185d324e081@438fe"
+      ],
+      "textures": [
+        "3004862e-868e-4b34-95cb-f185d324e081@e39f7"
+      ],
+      "materials": [
+        "1c8cf972-775b-4afe-b324-37ba0d7e0887"
+      ],
+      "scenes": [
+        "3004862e-868e-4b34-95cb-f185d324e081@d1932"
+      ]
+    },
+    "materialDumpDir": "db://assets/cases/animation/low_poly_fox_by_pixelmannen_animated",
+    "imageMetas": [
+      {
+        "uri": "db://assets/examples/animation/low_poly_fox_by_pixelmannen_animated/textures/fox_material_baseColor.png"
+      }
+    ],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

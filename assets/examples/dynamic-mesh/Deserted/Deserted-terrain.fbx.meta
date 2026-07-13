@@ -1,0 +1,136 @@
+{
+  "ver": "2.3.14",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f",
+  "files": [],
+  "subMetas": {
+    "dc9b1": {
+      "importer": "gltf-mesh",
+      "uuid": "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@dc9b1",
+      "displayName": "",
+      "id": "dc9b1",
+      "name": "red sandtone.mesh",
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 520200
+      },
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "7d6ab": {
+      "importer": "texture",
+      "uuid": "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@7d6ab",
+      "displayName": "",
+      "id": "7d6ab",
+      "name": "base_color_texture.texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": false,
+        "imageUuidOrDatabaseUri": "db://assets/examples/dynamic-mesh/Deserted/textures/SatMaps.png"
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ff2f6": {
+      "importer": "gltf-material",
+      "uuid": "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@ff2f6",
+      "displayName": "",
+      "id": "ff2f6",
+      "name": "deserted terrain.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "ed3ee": {
+      "importer": "gltf-scene",
+      "uuid": "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@ed3ee",
+      "displayName": "",
+      "id": "ed3ee",
+      "name": "Deserted-terrain.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [
+      {
+        "name": "base_color_texture",
+        "uri": "db://assets/examples/dynamic-mesh/Deserted/textures/SatMaps.png"
+      }
+    ],
+    "fbx": {
+      "smartMaterialEnabled": true,
+      "matchMeshNames": false
+    },
+    "assetFinder": {
+      "meshes": [
+        "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@dc9b1"
+      ],
+      "skeletons": [],
+      "textures": [
+        "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@7d6ab"
+      ],
+      "materials": [
+        "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@ff2f6"
+      ],
+      "scenes": [
+        "86cd2388-8d0f-4dc0-8b03-4e75fb571d0f@ed3ee"
+      ]
+    },
+    "mountAllAnimationsOnPrefab": true,
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    },
+    "legacyFbxImporter": false,
+    "allowMeshDataAccess": true,
+    "addVertexColor": false,
+    "generateLightmapUVNode": false,
+    "meshSimplify": {
+      "enable": true,
+      "targetRatio": 0.63
+    }
+  }
+}

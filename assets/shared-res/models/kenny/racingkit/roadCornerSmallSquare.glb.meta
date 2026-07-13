@@ -1,0 +1,130 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "017c5cf6-47b4-4189-8f8e-31ad5383f8fa",
+  "files": [],
+  "subMetas": {
+    "53398": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@53398",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "53398",
+      "name": "grass.material",
+      "displayName": ""
+    },
+    "2ab9a": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@2ab9a",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 182
+      },
+      "id": "2ab9a",
+      "name": "Mesh roadCornerSmallSquare.mesh",
+      "displayName": ""
+    },
+    "0ee4f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@0ee4f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "0ee4f",
+      "name": "_defaultMat.material",
+      "displayName": ""
+    },
+    "35ea4": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@35ea4",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 2
+      },
+      "id": "35ea4",
+      "name": "road.material",
+      "displayName": ""
+    },
+    "8ed34": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@8ed34",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "8ed34",
+      "name": "roadCornerSmallSquare.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@2ab9a"
+      ],
+      "materials": [
+        "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@53398",
+        "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@0ee4f",
+        "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@35ea4"
+      ],
+      "scenes": [
+        "017c5cf6-47b4-4189-8f8e-31ad5383f8fa@8ed34"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

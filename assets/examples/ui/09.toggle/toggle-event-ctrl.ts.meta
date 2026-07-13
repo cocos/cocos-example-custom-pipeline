@@ -1,0 +1,13 @@
+{
+  "ver": "4.0.24",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "c22ad932-a27c-4c32-af9d-cf5d519e1d15",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "moduleId": "project:///assets/cases/ui/09.toggle/toggle-event-ctrl.js",
+    "importerSettings": 0,
+    "simulateGlobals": []
+  }
+}

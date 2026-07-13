@@ -1,0 +1,116 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "1566f42d-6020-4d4f-9105-565608e613a3",
+  "files": [
+    "__original-animation-0.bin"
+  ],
+  "subMetas": {
+    "bcca5": {
+      "importer": "gltf-mesh",
+      "uuid": "1566f42d-6020-4d4f-9105-565608e613a3@bcca5",
+      "displayName": "",
+      "id": "bcca5",
+      "name": "UnnamedMesh.mesh",
+      "ver": "1.1.1",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 1
+      }
+    },
+    "a3140": {
+      "importer": "gltf-animation",
+      "uuid": "1566f42d-6020-4d4f-9105-565608e613a3@a3140",
+      "displayName": "",
+      "id": "a3140",
+      "name": "UnnamedAnimation.animation",
+      "ver": "1.0.18",
+      "imported": true,
+      "files": [
+        ".bin"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "wrapMode": 2,
+        "sample": 30,
+        "span": {
+          "from": 0,
+          "to": 4
+        },
+        "events": []
+      }
+    },
+    "77f57": {
+      "importer": "gltf-scene",
+      "uuid": "1566f42d-6020-4d4f-9105-565608e613a3@77f57",
+      "displayName": "",
+      "id": "77f57",
+      "name": "SimpleMorph.prefab",
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      }
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "animationImportSettings": [
+      {
+        "name": "UnnamedAnimation",
+        "duration": 4,
+        "fps": 30,
+        "splits": [
+          {
+            "name": "UnnamedAnimation",
+            "from": 0,
+            "to": 4,
+            "wrapMode": 2,
+            "previousId": "a3140"
+          }
+        ]
+      }
+    ],
+    "assetFinder": {
+      "meshes": [
+        "1566f42d-6020-4d4f-9105-565608e613a3@bcca5"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [],
+      "scenes": [
+        "1566f42d-6020-4d4f-9105-565608e613a3@77f57"
+      ]
+    },
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

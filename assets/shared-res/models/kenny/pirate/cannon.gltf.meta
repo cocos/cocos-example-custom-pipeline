@@ -1,0 +1,132 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "3d8aabf5-9513-4627-8cf5-15d0ab025bae",
+  "files": [],
+  "subMetas": {
+    "dcd2b": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "3d8aabf5-9513-4627-8cf5-15d0ab025bae@dcd2b",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 144
+      },
+      "id": "dcd2b",
+      "name": "cannon.mesh",
+      "displayName": ""
+    },
+    "75d5e": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "3d8aabf5-9513-4627-8cf5-15d0ab025bae@75d5e",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1,
+        "triangleCount": 856
+      },
+      "id": "75d5e",
+      "name": "barrel.mesh",
+      "displayName": ""
+    },
+    "861c9": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "3d8aabf5-9513-4627-8cf5-15d0ab025bae@861c9",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "861c9",
+      "name": "iron.material",
+      "displayName": ""
+    },
+    "e4014": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "3d8aabf5-9513-4627-8cf5-15d0ab025bae@e4014",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "e4014",
+      "name": "wood.material",
+      "displayName": ""
+    },
+    "a6dc2": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "3d8aabf5-9513-4627-8cf5-15d0ab025bae@a6dc2",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "a6dc2",
+      "name": "cannon.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "3d8aabf5-9513-4627-8cf5-15d0ab025bae@dcd2b",
+        "3d8aabf5-9513-4627-8cf5-15d0ab025bae@75d5e"
+      ],
+      "materials": [
+        "3d8aabf5-9513-4627-8cf5-15d0ab025bae@861c9",
+        "3d8aabf5-9513-4627-8cf5-15d0ab025bae@e4014"
+      ],
+      "scenes": [
+        "3d8aabf5-9513-4627-8cf5-15d0ab025bae@a6dc2"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

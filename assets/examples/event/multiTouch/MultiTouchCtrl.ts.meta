@@ -1,0 +1,13 @@
+{
+  "ver": "4.0.24",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "778bdb8e-9036-4426-8436-90efcc454705",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "moduleId": "project:///assets/cases/event/multiTouch/MultiTouchCtrl.js",
+    "importerSettings": 0,
+    "simulateGlobals": []
+  }
+}

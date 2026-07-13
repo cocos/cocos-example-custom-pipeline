@@ -1,0 +1,113 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "84916dc7-a9b0-4c2f-bf29-69b88f51c853",
+  "files": [],
+  "subMetas": {
+    "09f74": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "84916dc7-a9b0-4c2f-bf29-69b88f51c853@09f74",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 146
+      },
+      "id": "09f74",
+      "name": "Mesh blockSnowCornerSmall.mesh",
+      "displayName": ""
+    },
+    "3577b": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "84916dc7-a9b0-4c2f-bf29-69b88f51c853@3577b",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "3577b",
+      "name": "dirt.material",
+      "displayName": ""
+    },
+    "dfa42": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "84916dc7-a9b0-4c2f-bf29-69b88f51c853@dfa42",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "dfa42",
+      "name": "snow.material",
+      "displayName": ""
+    },
+    "89ffa": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "84916dc7-a9b0-4c2f-bf29-69b88f51c853@89ffa",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "89ffa",
+      "name": "blockSnowCornerSmall.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "84916dc7-a9b0-4c2f-bf29-69b88f51c853@09f74"
+      ],
+      "materials": [
+        "84916dc7-a9b0-4c2f-bf29-69b88f51c853@3577b",
+        "84916dc7-a9b0-4c2f-bf29-69b88f51c853@dfa42"
+      ],
+      "scenes": [
+        "84916dc7-a9b0-4c2f-bf29-69b88f51c853@89ffa"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

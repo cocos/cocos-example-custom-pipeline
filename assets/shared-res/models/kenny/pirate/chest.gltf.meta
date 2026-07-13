@@ -1,0 +1,132 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf",
+  "files": [],
+  "subMetas": {
+    "aad6e": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@aad6e",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 92
+      },
+      "id": "aad6e",
+      "name": "chest.mesh",
+      "displayName": ""
+    },
+    "07938": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@07938",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1,
+        "triangleCount": 360
+      },
+      "id": "07938",
+      "name": "lid.mesh",
+      "displayName": ""
+    },
+    "e4014": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@e4014",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "e4014",
+      "name": "wood.material",
+      "displayName": ""
+    },
+    "4de10": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@4de10",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 1
+      },
+      "id": "4de10",
+      "name": "stone.material",
+      "displayName": ""
+    },
+    "a19ff": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@a19ff",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "a19ff",
+      "name": "chest.prefab",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@aad6e",
+        "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@07938"
+      ],
+      "materials": [
+        "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@e4014",
+        "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@4de10"
+      ],
+      "scenes": [
+        "7ed2129e-95a9-4c9a-a4c8-1039e71a99bf@a19ff"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "ver": "2.3.14",
+  "importer": "gltf",
+  "imported": true,
+  "uuid": "a73e552f-7281-49b6-92e8-d098b4f792fc",
+  "files": [],
+  "subMetas": {
+    "35058": {
+      "ver": "1.0.14",
+      "importer": "gltf-scene",
+      "uuid": "a73e552f-7281-49b6-92e8-d098b4f792fc@35058",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "35058",
+      "name": "roadCornerLargeSand.prefab",
+      "displayName": ""
+    },
+    "ae208": {
+      "ver": "1.1.1",
+      "importer": "gltf-mesh",
+      "uuid": "a73e552f-7281-49b6-92e8-d098b4f792fc@ae208",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0,
+        "triangleCount": 24
+      },
+      "id": "ae208",
+      "name": "Mesh roadCornerLargeSand.mesh",
+      "displayName": ""
+    },
+    "5f31f": {
+      "ver": "1.0.14",
+      "importer": "gltf-material",
+      "uuid": "a73e552f-7281-49b6-92e8-d098b4f792fc@5f31f",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {},
+      "userData": {
+        "gltfIndex": 0
+      },
+      "id": "5f31f",
+      "name": "sand.material",
+      "displayName": ""
+    }
+  },
+  "userData": {
+    "normals": 2,
+    "tangents": 2,
+    "dumpMaterials": false,
+    "assetFinder": {
+      "meshes": [
+        "a73e552f-7281-49b6-92e8-d098b4f792fc@ae208"
+      ],
+      "materials": [
+        "a73e552f-7281-49b6-92e8-d098b4f792fc@5f31f"
+      ],
+      "scenes": [
+        "a73e552f-7281-49b6-92e8-d098b4f792fc@35058"
+      ],
+      "skeletons": [],
+      "textures": []
+    },
+    "imageMetas": [],
+    "lods": {
+      "enable": false,
+      "hasBuiltinLOD": false,
+      "options": [
+        {
+          "screenRatio": 0.25,
+          "faceCount": 1
+        },
+        {
+          "screenRatio": 0.125,
+          "faceCount": 0.25
+        },
+        {
+          "screenRatio": 0.01,
+          "faceCount": 0.1
+        }
+      ]
+    }
+  }
+}

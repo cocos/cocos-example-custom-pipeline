@@ -1,0 +1,13 @@
+{
+  "ver": "4.0.24",
+  "importer": "typescript",
+  "imported": true,
+  "uuid": "c355852b-7603-4227-889b-30a15a54bda5",
+  "files": [],
+  "subMetas": {},
+  "userData": {
+    "moduleId": "project:///assets/cases/ui/08.mask/graphics-mask.js",
+    "importerSettings": 0,
+    "simulateGlobals": []
+  }
+}
