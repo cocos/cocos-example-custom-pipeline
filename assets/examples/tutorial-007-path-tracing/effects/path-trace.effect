@@ -1,0 +1,282 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - pass: ray-trace
+      compute: trace-main
+}%
+
+CCProgram trace-main %{
+  precision highp float;
+  precision highp int;
+  layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+  #pragma rate b_geometry batch
+  layout(std140) uniform b_geometry { vec4 u_geometry[512]; };
+  #pragma rate b_hierarchy batch
+  layout(std140) uniform b_hierarchy { vec4 u_hierarchy[510]; };
+  #pragma rate b_materials batch
+  layout(std140) uniform b_materials { vec4 u_materials[32]; };
+  #pragma rate b_frame batch
+  layout(std140) uniform b_frame {
+    vec4 u_eye;
+    vec4 u_right;
+    vec4 u_up;
+    vec4 u_forward;
+    vec4 u_sampling;
+    vec4 u_scene;
+    vec4 u_extent;
+  };
+  #pragma rate b_history pass
+  layout(std430) buffer b_history { vec4 u_history[]; };
+  #pragma rate b_radiance pass
+  layout(std430) buffer b_radiance { vec4 u_radiance[]; };
+  #pragma rate b_guide pass
+  layout(std430) buffer b_guide { vec4 u_guides[]; };
+
+  const float PI = 3.14159265359;
+  const float EPSILON = 0.0003;
+  struct Ray { vec3 origin; vec3 direction; float time; };
+  struct Hit { vec3 position; vec3 normal; float distance; int material; bool front; };
+
+  uint randomState;
+  float randomFloat() {
+    randomState = randomState * 747796405u + 2891336453u;
+    uint word = ((randomState >> ((randomState >> 28u) + 4u)) ^ randomState) * 277803737u;
+    return float(((word >> 22u) ^ word) >> 8u) * (1.0 / 16777216.0);
+  }
+  vec3 localToWorld(vec3 direction, vec3 normal) {
+    vec3 tangent = normalize(cross(abs(normal.y) < 0.99 ? vec3(0, 1, 0) : vec3(1, 0, 0), normal));
+    return tangent * direction.x + cross(normal, tangent) * direction.y + normal * direction.z;
+  }
+  vec3 cosineDirection(vec3 normal) {
+    float phi = 2.0 * PI * randomFloat();
+    float radiusSquared = randomFloat();
+    return localToWorld(vec3(sqrt(radiusSquared) * cos(phi), sqrt(radiusSquared) * sin(phi),
+      sqrt(1.0 - radiusSquared)), normal);
+  }
+
+  bool intersectBounds(Ray ray, vec3 lower, vec3 upper, float closest) {
+    float nearDistance = EPSILON;
+    float farDistance = closest;
+    for (int axis = 0; axis < 3; axis++) {
+      // 平行射线按几何关系处理，保持包围盒边界上的求交结果确定。
+      if (abs(ray.direction[axis]) < 1e-12) {
+        if (ray.origin[axis] < lower[axis] || ray.origin[axis] > upper[axis]) return false;
+      } else {
+        float first = (lower[axis] - ray.origin[axis]) / ray.direction[axis];
+        float second = (upper[axis] - ray.origin[axis]) / ray.direction[axis];
+        nearDistance = max(nearDistance, min(first, second));
+        farDistance = min(farDistance, max(first, second));
+        if (farDistance < nearDistance) return false;
+      }
+    }
+    return true;
+  }
+  bool intersectPrimitive(int index, Ray ray, inout Hit hit) {
+    vec4 a = u_geometry[index * 4];
+    vec4 b = u_geometry[index * 4 + 1];
+    vec4 c = u_geometry[index * 4 + 2];
+    vec3 outward;
+    float distance;
+    if (a.w < 0.5) {
+      vec3 center = a.xyz + c.xyz * ray.time;
+      vec3 delta = ray.origin - center;
+      float halfB = dot(delta, ray.direction);
+      float discriminant = halfB * halfB - dot(delta, delta) + b.x * b.x;
+      if (discriminant < 0.0) return false;
+      float root = sqrt(discriminant);
+      distance = -halfB - root;
+      if (distance <= EPSILON) distance = -halfB + root;
+      if (distance <= EPSILON || distance >= hit.distance) return false;
+      outward = normalize(ray.origin + distance * ray.direction - center);
+    } else {
+      vec3 normalVector = cross(b.xyz, c.xyz);
+      outward = normalize(normalVector);
+      float denominator = dot(outward, ray.direction);
+      if (abs(denominator) < 1e-8) return false;
+      distance = dot(a.xyz - ray.origin, outward) / denominator;
+      if (distance <= EPSILON || distance >= hit.distance) return false;
+      vec3 relative = ray.origin + distance * ray.direction - a.xyz;
+      vec3 w = normalVector / dot(normalVector, normalVector);
+      float alpha = dot(w, cross(relative, c.xyz));
+      float beta = dot(w, cross(b.xyz, relative));
+      if (alpha < 0.0 || alpha > 1.0 || beta < 0.0 || beta > 1.0) return false;
+    }
+    hit.distance = distance;
+    hit.position = ray.origin + distance * ray.direction;
+    hit.front = dot(ray.direction, outward) < 0.0;
+    hit.normal = hit.front ? outward : -outward;
+    hit.material = int(b.w);
+    return true;
+  }
+  bool intersectScene(Ray ray, out Hit hit) {
+    hit.distance = 1e20;
+    hit.material = -1;
+    int index = 0;
+    // BVH 按前序排列，escape 指向整个子树之后的节点。
+    while (index < int(u_scene.y)) {
+      vec4 lower = u_hierarchy[index * 2];
+      vec4 upper = u_hierarchy[index * 2 + 1];
+      if (!intersectBounds(ray, lower.xyz, upper.xyz, hit.distance)) {
+        index = int(lower.w);
+      } else {
+        if (upper.w > 0.0) intersectPrimitive(int(upper.w) - 1, ray, hit);
+        index++;
+      }
+    }
+    return hit.material >= 0;
+  }
+  float lightPdf(vec3 origin, vec3 direction, float time) {
+    float density = 0.0;
+    Ray ray = Ray(origin, direction, time);
+    for (int light = 0; light < 2; light++) {
+      int index = int(u_scene.z) + light;
+      Hit hit;
+      hit.distance = 1e20;
+      if (intersectPrimitive(index, ray, hit)) {
+        vec3 u = u_geometry[index * 4 + 1].xyz;
+        vec3 v = u_geometry[index * 4 + 2].xyz;
+        float cosine = abs(dot(hit.normal, direction));
+        density += hit.distance * hit.distance / (cosine * length(cross(u, v)) * u_scene.w);
+      }
+    }
+    return density;
+  }
+  vec3 lightDirection(vec3 position) {
+    int index = int(u_scene.z) + min(int(randomFloat() * u_scene.w), 1);
+    vec3 point = u_geometry[index * 4].xyz
+      + randomFloat() * u_geometry[index * 4 + 1].xyz
+      + randomFloat() * u_geometry[index * 4 + 2].xyz;
+    return normalize(point - position);
+  }
+  float smithG1(float cosine, float alphaSquared) {
+    return 2.0 * cosine / (cosine + sqrt(alphaSquared + (1.0 - alphaSquared) * cosine * cosine));
+  }
+  vec3 fresnel(vec3 f0, float cosine) {
+    float m = clamp(1.0 - cosine, 0.0, 1.0);
+    float m2 = m * m;
+    return f0 + (1.0 - f0) * m2 * m2 * m;
+  }
+  vec3 marble(vec3 position) {
+    float vein = sin(position.x * 2.2 + position.z * 1.1
+      + 1.7 * sin(position.z * 1.6 + sin(position.x * 2.4)));
+    float line = pow(0.5 + 0.5 * vein, 18.0);
+    vec2 tile = abs(fract(position.xz / 2.5) - 0.5);
+    float grout = smoothstep(0.491, 0.497, max(tile.x, tile.y));
+    return mix(mix(vec3(0.62, 0.60, 0.54), vec3(0.16, 0.19, 0.20), line), vec3(0.12), grout);
+  }
+  vec3 tracePath(Ray ray) {
+    vec3 radiance = vec3(0);
+    vec3 throughput = vec3(1);
+    for (int bounce = 0; bounce < 24; bounce++) {
+      if (bounce >= int(u_sampling.z)) break;
+      Hit hit;
+      if (!intersectScene(ray, hit)) {
+        float sky = 0.5 + 0.5 * ray.direction.y;
+        radiance += throughput * mix(vec3(0.09, 0.105, 0.13), vec3(0.23, 0.31, 0.44), sky);
+        break;
+      }
+      vec4 base = u_materials[hit.material * 2];
+      vec4 parameters = u_materials[hit.material * 2 + 1];
+      int kind = int(base.w);
+      if (kind == 3) {
+        if (hit.front) radiance += throughput * base.xyz;
+        break;
+      }
+      vec3 nextDirection;
+      vec3 albedo = kind == 4 ? marble(hit.position) : base.xyz;
+      bool coatedReflection = kind == 4 && randomFloat() < 0.18;
+      if (kind == 2) {
+        if (!hit.front) throughput *= exp(-base.xyz * hit.distance);
+        float ratio = hit.front ? 1.0 / parameters.y : parameters.y;
+        float cosine = min(dot(-ray.direction, hit.normal), 1.0);
+        float sine = sqrt(1.0 - cosine * cosine);
+        float r0 = (1.0 - parameters.y) / (1.0 + parameters.y);
+        float reflectance = r0 * r0 + (1.0 - r0 * r0) * pow(1.0 - cosine, 5.0);
+        if (ratio * sine > 1.0 || randomFloat() < reflectance) {
+          nextDirection = reflect(ray.direction, hit.normal);
+        } else {
+          vec3 perpendicular = ratio * (ray.direction + cosine * hit.normal);
+          nextDirection = perpendicular - sqrt(max(1.0 - dot(perpendicular, perpendicular), 0.0)) * hit.normal;
+        }
+      } else if (kind == 1 || coatedReflection) {
+        float alpha = max(parameters.x * parameters.x, 0.002);
+        float alphaSquared = alpha * alpha;
+        float phi = 2.0 * PI * randomFloat();
+        float value = randomFloat();
+        float cosTheta = sqrt((1.0 - value) / (1.0 - value + alphaSquared * value));
+        float sinTheta = sqrt(max(1.0 - cosTheta * cosTheta, 0.0));
+        vec3 halfway = localToWorld(vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta), hit.normal);
+        vec3 view = -ray.direction;
+        float viewHalf = dot(view, halfway);
+        if (viewHalf <= 0.0) break;
+        nextDirection = reflect(ray.direction, halfway);
+        float normalLight = dot(hit.normal, nextDirection);
+        if (normalLight <= 0.0) break;
+        float normalView = dot(hit.normal, view);
+        vec3 f0 = coatedReflection ? vec3(0.04) : albedo;
+        throughput *= fresnel(f0, viewHalf) * smithG1(normalView, alphaSquared)
+          * smithG1(normalLight, alphaSquared) * viewHalf / (normalView * cosTheta);
+      } else {
+        nextDirection = randomFloat() < 0.5 ? cosineDirection(hit.normal) : lightDirection(hit.position);
+        float cosinePdf = max(dot(hit.normal, nextDirection), 0.0) / PI;
+        if (cosinePdf <= 0.0) break;
+        float mixturePdf = 0.5 * cosinePdf + 0.5 * lightPdf(hit.position, nextDirection, ray.time);
+        throughput *= albedo * cosinePdf / mixturePdf;
+      }
+      ray.origin = hit.position + hit.normal * (dot(nextDirection, hit.normal) > 0.0 ? EPSILON : -EPSILON);
+      ray.direction = normalize(nextDirection);
+      if (bounce >= 4) {
+        float probability = clamp(max(throughput.r, max(throughput.g, throughput.b)), 0.05, 0.95);
+        if (randomFloat() >= probability) break;
+        throughput /= probability;
+      }
+    }
+    return radiance;
+  }
+  Ray cameraRay(vec2 pixel, vec2 size, bool stochastic) {
+    vec2 screen = (pixel / size * 2.0 - 1.0) * vec2(size.x / size.y, 1.0);
+    vec3 direction = u_forward.xyz + u_eye.w * (screen.x * u_right.xyz + screen.y * u_up.xyz);
+    vec3 origin = u_eye.xyz;
+    float time = 0.5;
+    if (stochastic) {
+      float angle = 2.0 * PI * randomFloat();
+      float radius = sqrt(randomFloat()) * u_right.w;
+      vec3 offset = radius * (cos(angle) * u_right.xyz + sin(angle) * u_up.xyz);
+      origin += offset;
+      direction = direction * u_forward.w - offset;
+      time = mix(0.5, randomFloat(), u_up.w);
+    }
+    return Ray(origin, normalize(direction), time);
+  }
+  void main() {
+    ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size = ivec2(u_extent.xy);
+    if (any(greaterThanEqual(pixel, size))) return;
+    uint pixelIndex = uint(pixel.x + pixel.y * size.x);
+    randomState = pixelIndex * 1973u + uint(u_sampling.x) * 9277u + 89173u;
+    vec3 sum = vec3(0);
+    float squaredLuminance = 0.0;
+    for (int sampleIndex = 0; sampleIndex < 16; sampleIndex++) {
+      if (sampleIndex >= int(u_sampling.y)) break;
+      vec2 jitter = vec2(randomFloat(), randomFloat());
+      vec3 color = tracePath(cameraRay(vec2(pixel) + jitter, vec2(size), true));
+      sum += color;
+      float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+      squaredLuminance += luminance * luminance;
+    }
+    vec4 batch = vec4(sum, squaredLuminance) / u_sampling.y;
+    vec4 accumulated = batch;
+    // 重置后的首帧完整覆盖缓冲区，不读取上一轮采样。
+    if (u_sampling.x > 0.0) {
+      vec4 previous = u_history[pixelIndex];
+      accumulated = mix(previous, batch, u_sampling.y / (u_sampling.x + u_sampling.y));
+    }
+    u_radiance[pixelIndex] = accumulated;
+    Hit primary;
+    Ray centerRay = cameraRay(vec2(pixel) + 0.5, vec2(size), false);
+    vec4 guide = vec4(0, 0, 0, -1);
+    if (intersectScene(centerRay, primary)) guide = vec4(primary.normal, primary.distance);
+    u_guides[pixelIndex] = guide;
+  }
+}%
