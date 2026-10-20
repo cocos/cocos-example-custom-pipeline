@@ -1,0 +1,53 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - pass: ray-filter
+      compute: filter-main
+}%
+
+CCProgram filter-main %{
+  precision highp float;
+  precision highp int;
+  layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+  #pragma rate b_filter batch
+  layout(std140) uniform b_filter { vec4 u_filter; };
+  #pragma rate b_source pass
+  layout(std430) buffer b_source { vec4 u_source[]; };
+  #pragma rate b_guide pass
+  layout(std430) buffer b_guide { vec4 u_guides[]; };
+  #pragma rate b_filtered pass
+  layout(std430) buffer b_filtered { vec4 u_filtered[]; };
+
+  float luminance(vec3 color) { return dot(color, vec3(0.2126, 0.7152, 0.0722)); }
+  void main() {
+    ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size = ivec2(u_filter.zw);
+    if (any(greaterThanEqual(pixel, size))) return;
+    int pixelIndex = pixel.x + pixel.y * size.x;
+    vec4 center = u_source[pixelIndex];
+    vec4 centerGuide = u_guides[pixelIndex];
+    float centerLuminance = luminance(center.rgb);
+    float variance = max(center.a - centerLuminance * centerLuminance, 0.0);
+    float sigma = 3.0 * sqrt(variance / u_filter.y) + 0.035;
+    vec3 color = vec3(0);
+    float weightSum = 0.0;
+    for (int y = -2; y <= 2; y++) {
+      for (int x = -2; x <= 2; x++) {
+        ivec2 neighbor = clamp(pixel + ivec2(x, y) * int(u_filter.x), ivec2(0), size - 1);
+        int neighborIndex = neighbor.x + neighbor.y * size.x;
+        vec4 guide = u_guides[neighborIndex];
+        vec3 sampleColor = u_source[neighborIndex].rgb;
+        float kernel = float((x == 0 ? 6 : (abs(x) == 1 ? 4 : 1)) * (y == 0 ? 6 : (abs(y) == 1 ? 4 : 1)));
+        float normalWeight = pow(clamp(dot(centerGuide.xyz, guide.xyz), 0.0, 1.0), 64.0);
+        if (centerGuide.w < 0.0 && guide.w < 0.0) normalWeight = 1.0;
+        float depthWeight = exp(-abs(guide.w - centerGuide.w) / (0.035 * u_filter.x + 0.003 * abs(centerGuide.w)));
+        float colorWeight = exp(-abs(luminance(sampleColor) - centerLuminance) / sigma);
+        float weight = kernel * normalWeight * depthWeight * colorWeight;
+        if (x == 0 && y == 0) weight = 36.0;
+        color += sampleColor * weight;
+        weightSum += weight;
+      }
+    }
+    u_filtered[pixelIndex] = vec4(color / weightSum, center.a);
+  }
+}%

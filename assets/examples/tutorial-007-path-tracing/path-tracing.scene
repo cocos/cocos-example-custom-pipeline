@@ -1,0 +1,67 @@
+[
+  {
+    "__type__": "cc.SceneAsset", "_name": "path-tracing", "_objFlags": 0,
+    "__editorExtras__": {}, "_native": "", "scene": { "__id__": 1 }
+  },
+  {
+    "__type__": "cc.Scene", "_name": "path-tracing", "_objFlags": 0,
+    "__editorExtras__": {}, "_parent": null, "_children": [{ "__id__": 2 }],
+    "_active": true, "_components": [], "_prefab": null,
+    "_lpos": { "__type__": "cc.Vec3", "x": 0, "y": 0, "z": 0 },
+    "_lrot": { "__type__": "cc.Quat", "x": 0, "y": 0, "z": 0, "w": 1 },
+    "_lscale": { "__type__": "cc.Vec3", "x": 1, "y": 1, "z": 1 },
+    "_mobility": 0, "_layer": 1073741824,
+    "_euler": { "__type__": "cc.Vec3", "x": 0, "y": 0, "z": 0 },
+    "autoReleaseAssets": false, "_globals": { "__id__": 5 },
+    "_id": "81ea58ae-1f7d-48ae-a126-4f2c66fb13db"
+  },
+  {
+    "__type__": "cc.Node", "_name": "PathTracingCamera", "_objFlags": 0,
+    "__editorExtras__": {}, "_parent": { "__id__": 1 }, "_children": [],
+    "_active": true, "_components": [{ "__id__": 3 }, { "__id__": 4 }],
+    "_prefab": null,
+    "_lpos": { "__type__": "cc.Vec3", "x": 3.8, "y": 3.5, "z": 11.1 },
+    "_lrot": { "__type__": "cc.Quat", "x": 0, "y": 0, "z": 0, "w": 1 },
+    "_lscale": { "__type__": "cc.Vec3", "x": 1, "y": 1, "z": 1 },
+    "_mobility": 0, "_layer": 1073741824,
+    "_euler": { "__type__": "cc.Vec3", "x": 0, "y": 0, "z": 0 },
+    "_id": "38efa328-507a-4678-8fe5-33ec16170b9e"
+  },
+  {
+    "__type__": "cc.Camera", "_name": "", "_objFlags": 0,
+    "__editorExtras__": {}, "node": { "__id__": 2 }, "_enabled": true, "__prefab": null,
+    "_projection": 1, "_priority": 0, "_fov": 40, "_fovAxis": 0,
+    "_orthoHeight": 10, "_near": 0.01, "_far": 100,
+    "_color": { "__type__": "cc.Color", "r": 10, "g": 14, "b": 18, "a": 255 },
+    "_depth": 1, "_stencil": 0, "_clearFlags": 7,
+    "_rect": { "__type__": "cc.Rect", "x": 0, "y": 0, "width": 1, "height": 1 },
+    "_aperture": 19, "_shutter": 7, "_iso": 0, "_screenScale": 1,
+    "_visibility": 1822425087, "_targetTexture": null, "_postProcess": null,
+    "_usePostProcess": false, "_cameraType": -1, "_trackingType": 0,
+    "_id": "7950d734-017c-4f31-9fde-7c729068bc41"
+  },
+  {
+    "__type__": "f9c43Y0w4tLpZNI4HnFCSJ7", "_name": "", "_objFlags": 0,
+    "__editorExtras__": {}, "node": { "__id__": 2 }, "_enabled": true, "__prefab": null,
+    "traceEffect": { "__uuid__": "58edbde4-c6c0-4831-8b6c-85f32bc0498d", "__expectedType__": "cc.EffectAsset" },
+    "filterEffect": { "__uuid__": "1ea55c2b-d8bc-448d-b25e-49c9b2700bd5", "__expectedType__": "cc.EffectAsset" },
+    "resolveEffect": { "__uuid__": "171b815b-092e-4e28-a194-58f5fc5b9980", "__expectedType__": "cc.EffectAsset" },
+    "presentEffect": { "__uuid__": "aa0e9be8-598d-4fa8-9a24-b6fd5def89c1", "__expectedType__": "cc.EffectAsset" },
+    "_id": "29166caf-0d14-41da-9e90-005ebfbbeb35"
+  },
+  {
+    "__type__": "cc.SceneGlobals",
+    "ambient": { "__id__": 6 }, "shadows": { "__id__": 7 }, "_skybox": { "__id__": 8 },
+    "fog": { "__id__": 9 }, "octree": { "__id__": 10 }, "skin": { "__id__": 11 },
+    "lightProbeInfo": { "__id__": 12 }, "postSettings": { "__id__": 13 },
+    "bakedWithStationaryMainLight": false, "bakedWithHighpLightmap": false
+  },
+  { "__type__": "cc.AmbientInfo" },
+  { "__type__": "cc.ShadowsInfo", "_enabled": false },
+  { "__type__": "cc.SkyboxInfo", "_enabled": false, "_useHDR": true },
+  { "__type__": "cc.FogInfo", "_enabled": false },
+  { "__type__": "cc.OctreeInfo", "_enabled": false },
+  { "__type__": "cc.SkinInfo", "_enabled": false },
+  { "__type__": "cc.LightProbeInfo" },
+  { "__type__": "cc.PostSettingsInfo", "_toneMappingType": 0 }
+]

@@ -1,0 +1,44 @@
+CCEffect %{
+  techniques:
+  - passes:
+    - pass: ray-resolve
+      compute: resolve-main
+}%
+
+CCProgram resolve-main %{
+  precision highp float;
+  precision highp int;
+  precision highp image2D;
+  layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+  #pragma rate b_source pass
+  layout(std430) buffer b_source { vec4 u_source[]; };
+  #pragma rate b_guide pass
+  layout(std430) buffer b_guide { vec4 u_guides[]; };
+  #pragma rate b_display batch
+  layout(std140) uniform b_display { vec4 u_display; };
+  #pragma rate displayOutput pass
+  layout(rgba8) writeonly uniform image2D displayOutput;
+
+  vec3 aces(vec3 color) {
+    return clamp((color * (2.51 * color + 0.03)) / (color * (2.43 * color + 0.59) + 0.14), 0.0, 1.0);
+  }
+  void main() {
+    ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size = imageSize(displayOutput);
+    if (any(greaterThanEqual(pixel, size))) return;
+    int index = pixel.x + pixel.y * size.x;
+    vec3 color = u_source[index].rgb;
+    if (u_display.y > 0.5 && u_display.y < 1.5) {
+      color = u_guides[index].xyz * 0.5 + 0.5;
+    } else if (u_display.y > 1.5) {
+      float depth = u_guides[index].w;
+      color = vec3(depth < 0.0 ? 0.0 : exp(-depth * 0.075));
+    } else {
+      color = aces(color * exp2(u_display.x));
+      color = mix(12.92 * color, 1.055 * pow(color, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), color));
+      vec2 screen = (vec2(pixel) + 0.5) / vec2(size) * 2.0 - 1.0;
+      color *= 1.0 - 0.12 * dot(screen, screen);
+    }
+    imageStore(displayOutput, pixel, vec4(color, 1.0));
+  }
+}%
